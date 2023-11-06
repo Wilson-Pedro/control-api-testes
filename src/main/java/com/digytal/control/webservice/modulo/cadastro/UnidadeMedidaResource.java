@@ -17,8 +17,10 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/unidades-medida")
 @Tag(name = "Recursos referente a unidade medida")
 public class UnidadeMedidaResource {
+	
     @Autowired
     private UnidadeMedidaService service;
+    
     @Operation(summary = "Inclui uma unidade medida", description = "Cadastrar uma unidade na base de dados")
     @PostMapping
     @ApiResponses(value = {
@@ -45,6 +47,7 @@ public class UnidadeMedidaResource {
     public Response alterar(@PathVariable("id") Integer id, @RequestBody UnidadeMedidaRequest request){
         return ResponseFactory.create(service.alterar(id,request), ResponseMessage.alteracao(Entities.UNIDADE_MEDIDA_ENTITY.getLabel()));
     }
+    
     @Operation(summary = "Consulta as unidades de medida", description = "Retorna uma consulta de unidades de medida com base no nome informado")
     @GetMapping(value = "/nome/{nome}")
     @ApiResponses(value = {
@@ -56,6 +59,7 @@ public class UnidadeMedidaResource {
     public Response listar(@PathVariable(value = "nome") String nome) {
         return ResponseFactory.ok(service.listar(nome),ResponseMessage.consulta(Entities.UNIDADE_MEDIDA_ENTITY.getLabel()));
     }
+    
     @Operation(summary = "Lista as unidades de medida marcadas como embalagems", description = "Retorna as unidades de medidia definidas como embalagem")
     @GetMapping(value = "/listagem/embalagens")
     @ApiResponses(value = {
@@ -67,6 +71,7 @@ public class UnidadeMedidaResource {
     public Response listarEmbalagens() {
         return ResponseFactory.ok(service.listar(true),ResponseMessage.listagem(Entities.UNIDADE_MEDIDA_ENTITY.getLabel()));
     }
+    
     @Operation(summary = "Lista as unidades de medida que NÃO são embalagem", description = "Retorna os registros de unidades de medida que não são embalagem")
     @GetMapping(value = "/listagem/")
     @ApiResponses(value = {
