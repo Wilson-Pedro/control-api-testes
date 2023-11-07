@@ -1,5 +1,6 @@
 package com.digytal.control.webservice.publico;
 
+
 import com.digytal.control.infra.http.response.Response;
 import com.digytal.control.infra.http.response.ResponseFactory;
 import com.digytal.control.infra.model.CredenciamentoResponse;
@@ -39,7 +40,6 @@ public class PublicoResource {
         CredenciamentoResponse response = primeiroAcessoService.configurarPrimeiroAcesso(cpfCnpj, request);
         return ResponseFactory.ok(response,"Primeiro acesso realizado com sucesso, confira sua caixa de e-mail");
     }
-    
     
     @PatchMapping("/alteracao-senha/{expiracao}")
     public Response alterarSenhaExpirada(@PathVariable("expiracao")Long expiracao, @RequestBody SenhaAlteracaoRequest request){

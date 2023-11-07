@@ -18,10 +18,12 @@ public class UnidadeMedidaEntity {
     private String localiza;
     private String descricao;
     private Double conteudo;
-    @Column(name = "fl_excluido")
+    @Column(name = "is_excluido")
     private boolean excluido;
-    @Column(name = "fl_embalagem")
+    @Column(name = "is_embalagem")
     private boolean embalagem;
     @Column(name = "organizacao_id")
     private Integer organizacao;
+    public UnidadeMedidaEntity(){}
+    public UnidadeMedidaEntity(Integer organizacao){this.organizacao = organizacao;}
 }

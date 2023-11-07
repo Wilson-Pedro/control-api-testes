@@ -19,8 +19,10 @@ public class ModeloEntity implements Serializable {
     @Column(name = "nome_abreviado")
     private String nomeAbreviado;
     private String sigla;
-    @Column(name = "fl_excluido")
+    @Column(name = "is_excluido")
     private boolean excluido;
     @Column(name = "organizacao_id")
     private Integer organizacao;
+    public ModeloEntity(){}
+    public ModeloEntity(Integer organizacao){ this.organizacao = organizacao;}
 }

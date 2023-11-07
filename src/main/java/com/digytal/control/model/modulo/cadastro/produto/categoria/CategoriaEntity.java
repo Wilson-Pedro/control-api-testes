@@ -15,9 +15,11 @@ public class CategoriaEntity{
     private String localiza;
     @Column(name = "nome_abreviado")
     private String nomeAbreviado;
-    @Column(name = "fl_excluido")
+    @Column(name = "is_excluido")
     private boolean excluido;
     @Column(name = "organizacao_id")
     private Integer organizacao;
+    public CategoriaEntity(){}
+    public CategoriaEntity(Integer organizacao){this.organizacao = organizacao;}
 
 }

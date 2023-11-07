@@ -1,6 +1,5 @@
 package com.digytal.control.infra.security.jwt;
 
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,7 +19,7 @@ public class JwtCreator {
     public static final String ORGANIZACAO_ID="organizacao";
     public static final String VALIDO="valido";
     public static String create(String prefix,String key, JwtObject jwtObject) {
-        String token = Jwts.builder().setSubject(jwtObject.getSubject()).setIssuedAt(Timestamp.valueOf(jwtObject.getIssuedAt())).setExpiration(Timestamp.valueOf(jwtObject.getExpiration()))
+        String token = Jwts.builder().setSubject(jwtObject.getSubject()).setIssuedAt(java.sql.Timestamp.valueOf(jwtObject.getIssuedAt())).setExpiration(java.sql.Timestamp.valueOf(jwtObject.getExpiration()))
                 .claim(ROLES_AUTHORITIES, checkRoles(jwtObject.getRoles())).signWith(SignatureAlgorithm.HS512, key)
                 .claim(USER_ID, jwtObject.getUsuario())
                 .claim(EMPRESA_ID, jwtObject.getEmpresa())

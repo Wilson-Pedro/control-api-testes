@@ -85,10 +85,7 @@ public class Validations {
                    int max = Integer.parseInt(condition);
                    if (!Validation.maxLength(value, max))
                        throw new TamanhoMaximoException(label, max);
-               } else if (type == Type.NOT_EMPTY) {
-                   if (Validation.isEmpty(value))
-                       throw new CampoObrigatorioException(label);
-               } else if (type == Type.CPF_CNPJ) {
+               }  else if (type == Type.CPF_CNPJ) {
                    if (!Validation.cpfCnpj(value.toString()))
                        throw new CpfCnpjInvalidoException();
                } else if (type == Type.EMAIL) {

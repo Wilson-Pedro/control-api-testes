@@ -121,7 +121,6 @@ public class QueryRepository {
             Class type = myAccessor.getPropertyType (nested);
             if(myAccessor.getPropertyValue (nested)==null) {
                 myAccessor.setPropertyValue(nested, type.newInstance());
-                System.out.println("Criando nova instance para o atributo " + nested);
             }
             length --;
         }

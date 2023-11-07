@@ -14,10 +14,12 @@ public abstract class Movimento {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Setter(AccessLevel.NONE)
     private Integer id;
-
     @Column(name = "meio_pagto")
     private MeioPagamento meioPagamento;
+    @Column(name = "cadastro_id")
+    private Integer cadastro;
+    @Column(name = "transacao_id", updatable = false)
+    private Integer transacao;
+    private String descricao;
 
-    @Column(name = "transacao_id", insertable = false, updatable = false)
-    private Integer transacaoId;
 }

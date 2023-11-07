@@ -1,6 +1,5 @@
 package com.digytal.control.model.modulo.contrato;
 
-import com.digytal.control.model.modulo.contrato.pagamento.ContratoPagamentoEntity;
 import com.digytal.control.model.comum.Participante;
 import com.digytal.control.model.comum.RegistroData;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -21,7 +20,6 @@ public class ContratoEntity {
     @Setter(AccessLevel.NONE)
     @JsonIgnore
     private Integer id;
-    private String localiza;
     @Column(name = "nr_contrato")
     private String numero;
     private String descricao;
@@ -42,8 +40,4 @@ public class ContratoEntity {
     @OneToMany(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "contrato_id")
     private List<ContratoItemEntity> itens = new ArrayList<>();
-    @OneToMany(cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "contrato_id")
-    private List<ContratoPagamentoEntity> pagamentos;
-
 }

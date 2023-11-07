@@ -57,10 +57,10 @@ public class Text {
     }
     public static String adjust(String text, int maxLength){
         String format = "%-".concat(String.format("%d.%<ds", maxLength ));
-        return String.format(format, text);
+        return text==null ? null : String.format(format, text);
     }
     public static String maxLength(String text, int maxLength){
-        return adjust(text, maxLength).trim();
+        return text==null ? null : adjust(text, maxLength).trim();
     }
 
 }

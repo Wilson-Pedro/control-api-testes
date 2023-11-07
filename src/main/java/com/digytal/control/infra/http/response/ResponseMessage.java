@@ -15,8 +15,13 @@ public class ResponseMessage {
     public static final String R500 = "Erro de servidor, contacte o suporte técnico";
 
     public static String inclusao(String entidade) {
-
         return String.format("%s inserido(a) com sucesso!", entidade);
+    }
+    public static String busca(String entidade) {
+        return String.format("Solicitação de busca em %s bem-sucedida(a)!", entidade);
+    }
+    public static String alteracao(String entidade) {
+        return String.format("Registro de %s alterado com sucesso!", entidade);
     }
     public static String consulta(String entidade) {
         return String.format("Solicitação de consulta em %s bem-sucedida(a)!", entidade);
@@ -24,11 +29,10 @@ public class ResponseMessage {
     public static String listagem(String entidade) {
         return String.format("Solicitação de listagem em %s bem-sucedida(a)!", entidade);
     }
-    public static String alteracao(String entidade) {
-        return String.format("Registro de %s alterado com sucesso!", entidade);
-    }public static String exclusao(String entidade) {
+
+    public static String exclusao(String entidade) {
         return String.format("Registro de %s deletado com sucesso!", entidade);
     }
 
-    //alteracao, exclusao, impressao, consulta, busca, visualizacao
+    //inclusao, alteracao, exclusao, impressao, consulta, busca, listagem, visualizacao
 }

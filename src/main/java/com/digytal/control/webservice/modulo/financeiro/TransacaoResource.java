@@ -10,13 +10,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/transacoes")
 @Tag(name = "Recursos referente a lancamento")
 public class TransacaoResource {
-
     @Autowired
     private TransacaoService service;
     @ApiResponses(value = {
@@ -27,7 +27,8 @@ public class TransacaoResource {
             @ApiResponse(responseCode = ResponseMessage.R409),
             @ApiResponse(responseCode = ResponseMessage.R500),
     })
-    @PostMapping("/pagamento")
+    @PostMapping("/despesa")
+    @ResponseStatus(code = HttpStatus.CREATED)
     public Response pagar(@RequestBody TransacaoRequest request){
         incluirPagamento(AplicacaoTipo.DESPESA,request);
         return ResponseFactory.create(true,String.format("Pagamento de %,.2f realizado com sucesso", request.getValor()));
@@ -40,7 +41,8 @@ public class TransacaoResource {
             @ApiResponse(responseCode = ResponseMessage.R409),
             @ApiResponse(responseCode = ResponseMessage.R500),
     })
-    @PostMapping("/recebimento")
+    @PostMapping("/receita")
+    @ResponseStatus(code = HttpStatus.CREATED)
     public Response receber(@RequestBody TransacaoRequest request){
         incluirPagamento(AplicacaoTipo.RECEITA,request);
         return ResponseFactory.create(true,String.format("Recebimento de %,.2f realizado com sucesso", request.getValor()));
@@ -54,6 +56,7 @@ public class TransacaoResource {
             @ApiResponse(responseCode = ResponseMessage.R500),
     })
     @PostMapping("/tipo/{tipo}")
+    @ResponseStatus(code = HttpStatus.CREATED)
     private Response inserir(@PathVariable("tipo") AplicacaoTipo tipo, @RequestBody TransacaoRequest request){
         incluirPagamento(tipo,request);
         return ResponseFactory.create(true,String.format("%s de %,.2f realizada com sucesso", tipo.getDescricao(), request.getValor()));

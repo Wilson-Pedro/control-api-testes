@@ -7,6 +7,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Setter;
@@ -23,8 +24,14 @@ public class MarcaEntity{
     @Column(name = "nome_abreviado")
     private String nomeAbreviado;
     private String sigla;
-    @Column(name = "fl_excluido")
+    @Column(name = "is_excluido")
     private boolean excluido;
     @Column(name = "organizacao_id")
     private Integer organizacao;
+    public MarcaEntity(){
+
+    }
+    public MarcaEntity(Integer organizacao){
+        this.organizacao = organizacao;
+    }
 }

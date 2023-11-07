@@ -6,19 +6,16 @@ import com.digytal.control.model.comum.MeioPagamento;
 import com.digytal.control.model.modulo.acesso.empresa.aplicacao.AplicacaoTipo;
 import com.digytal.control.model.modulo.acesso.empresa.conta.ContaEntity;
 import com.digytal.control.model.modulo.acesso.empresa.pagamento.FormaPagamentoEntity;
-import com.digytal.control.model.modulo.financeiro.Valor;
+import com.digytal.control.model.modulo.financeiro.transacao.TransacaoEntity;
+import com.digytal.control.model.modulo.financeiro.transacao.TransacaoValor;
 import com.digytal.control.model.modulo.financeiro.pagamento.PagamentoEntity;
-import com.digytal.control.model.modulo.financeiro.transacao.TransacaoRateioRequest;
-import com.digytal.control.model.modulo.financeiro.transacao.TransacaoRequest;
+import com.digytal.control.model.modulo.financeiro.transacao.pagamento.FormaPagamentoRequest;
 import com.digytal.control.repository.modulo.acesso.empresa.ContaRepository;
-import com.digytal.control.repository.modulo.acesso.empresa.FormaPagamentoRepository;
+import com.digytal.control.repository.modulo.fincanceiro.PagamentoRepository;
 import com.digytal.control.service.comum.AbstractService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.Collections;
-import java.util.List;
 
 import static com.digytal.control.infra.commons.validation.Attributes.ID;
 
@@ -26,32 +23,34 @@ import static com.digytal.control.infra.commons.validation.Attributes.ID;
 @Slf4j
 public class PagamentoService extends AbstractService {
     @Autowired
-    private FormaPagamentoRepository formaPagamentoRepository;
-    @Autowired
     private ContaRepository contaRepository;
-    public PagamentoEntity criarPagamento(AplicacaoTipo tipo, TransacaoRateioRequest rateio){
+    @Autowired
+    private PagamentoRepository repository;
+    public void criarPagamentoParcelamento(AplicacaoTipo tipo, FormaPagamentoRequest rateio, String descricao, Integer parcelamento, TransacaoEntity transacao){
+        PagamentoEntity entity = criarPagamento(tipo, transacao.getPartes().getCadastro(), rateio, descricao);
+        entity.setParcelamento(parcelamento);
+        entity.setTransacao(transacao.getId());
+        repository.save(entity);
+    }
+
+    public PagamentoEntity criarPagamento(AplicacaoTipo tipo, Integer cadastro, FormaPagamentoRequest rateio, String descricao){
         Double valor = rateio.getValorPago();
         MeioPagamento meioPagamento = rateio.getMeioPagamento();
-        FormaPagamentoEntity formaPagamento = formaPagamentoRepository.findByEmpresaAndMeioPagamentoAndNumeroParcelas(requestInfo.getEmpresa(),meioPagamento,1);
-        if(formaPagamento==null)
-            throw new RegistroNaoLocalizadoException(Entities.EMPRESA_CONTA_ENTITY, ID);
-
         PagamentoEntity entity = new PagamentoEntity();
+        entity.setDescricao(descricao);
         entity.setMeioPagamento(meioPagamento);
         atualizarSaldoConta(tipo, meioPagamento, valor, entity);
-
+        entity.setCadastro(cadastro);
         return  entity;
     }
     private void atualizarSaldoConta(AplicacaoTipo tipo, MeioPagamento meioPagamento, Double valor, PagamentoEntity entity){
-        FormaPagamentoEntity formaPagamento = formaPagamentoRepository.findByEmpresaAndMeioPagamentoAndNumeroParcelas(requestInfo.getEmpresa(),meioPagamento,1);
-        if(formaPagamento==null)
-            throw new RegistroNaoLocalizadoException(Entities.EMPRESA_CONTA_ENTITY, ID);
+        FormaPagamentoEntity formaPagamento = consultarFormaPagamento(meioPagamento);
 
         ContaEntity conta = contaRepository.findById(formaPagamento.getConta()).orElseThrow(()-> new RegistroNaoLocalizadoException(Entities.EMPRESA_CONTA_ENTITY, ID));
         if(tipo == AplicacaoTipo.DESPESA &&  valor > conta.getSaldo())
             throw new SaldoInsuficienteException();
 
-        entity.setValor(Valor.of(tipo, valor));
+        entity.setValor(TransacaoValor.of(tipo, valor));
         entity.setConta(conta.getId());
         conta.setSaldo(conta.getSaldo() + entity.getValor().getValorOperacional());
 

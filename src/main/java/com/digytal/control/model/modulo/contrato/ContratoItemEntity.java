@@ -7,7 +7,7 @@ import lombok.Setter;
 import javax.persistence.*;
 
 @Entity
-@Table(schema = "apl_contratos", name = "tab_contrato_item")
+@Table(schema = "apl_contrato", name = "tab_contrato_item")
 @Data
 public class ContratoItemEntity {
     @Id
@@ -15,7 +15,6 @@ public class ContratoItemEntity {
     @Setter(AccessLevel.NONE)
     @JsonIgnore
     private Integer id;
-    private String localiza;
     @Embedded
     private ProdutoItem produto;
     @Column(name = "descricao")

@@ -63,7 +63,7 @@ public class CepService {
             CepResponse codigoPostal = client.getForObject(url, CepResponse.class, cep);
             codigoPostal.setValido(codigoPostal.getCep()!=null);
             if(codigoPostal.isValido()){
-                Definitions.build().upperNormalize(LOGRADOURO, COMPLEMENTO, BAIRRO,UF,LOCALIDADE).define(codigoPostal);
+                //Definitions.build().upperNormalize(LOGRADOURO, COMPLEMENTO, BAIRRO,UF,LOCALIDADE).define(codigoPostal);
                 Definitions.build().onlyDigits(CEP).define(codigoPostal);
             }else {
                 codigoPostal.setCep(cep);

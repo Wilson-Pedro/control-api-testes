@@ -4,6 +4,7 @@ import com.digytal.control.infra.commons.validation.Entities;
 import com.digytal.control.infra.http.response.Response;
 import com.digytal.control.infra.http.response.ResponseFactory;
 import com.digytal.control.infra.http.response.ResponseMessage;
+import com.digytal.control.model.comum.cadastramento.CadastroTipo;
 import com.digytal.control.model.modulo.cadastro.CadastroRequest;
 import com.digytal.control.service.modulo.cadastro.CadastroService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,7 +34,7 @@ public class CadastroResource {
         return ResponseFactory.create(service.alterar(id, request),ResponseMessage.alteracao(Entities.CADASTRO_ENTITY.getLabel()));
     }
     @PostMapping()
-    @Operation(summary = "Incluir uma cadastro", description = "Inclui um cadastro na base de dados")
+    @Operation(summary = "Incluir um cadastro", description = "Inclui um cadastro na base de dados")
   
     @ApiResponses(value = {
             @ApiResponse(responseCode = ResponseMessage.R201),
@@ -48,15 +49,15 @@ public class CadastroResource {
     }
 
     @GetMapping("/clientes/nome/{nome}")
-    @Operation(summary = "Listar o(s) cliente(s)", description = "Retorna uma lista do(s) cliente(s) da base de dados")
+    @Operation(summary = "Consulta de clientes por nome", description = "Retorna uma lista do(s) cliente(s) da base de dados")
     @ApiResponses(value = {
             @ApiResponse(responseCode = ResponseMessage.R200),
             @ApiResponse(responseCode = ResponseMessage.R204),
             @ApiResponse(responseCode = ResponseMessage.R400),
             @ApiResponse(responseCode = ResponseMessage.R500),
     })
-    public Response listarClientes(@PathVariable("nome") String nome){
-        return ResponseFactory.ok(service.listarClientes(nome),ResponseMessage.listagem(Entities.CLIENTE_ENTITY.getLabel()));
+    public Response consultarClientes(@PathVariable("nome") String nome){
+        return ResponseFactory.ok(service.consultar(CadastroTipo.CLIENTE, nome),ResponseMessage.listagem(Entities.CLIENTE_ENTITY.getLabel()));
     }
     @GetMapping("/fornecedores/nome/{nome}")
     @Operation(summary = "Listar o(s) fornecedor(es)", description = "Retorna uma lista do(s) fornecedor(es) da base de dados")
@@ -66,7 +67,29 @@ public class CadastroResource {
             @ApiResponse(responseCode = ResponseMessage.R400),
             @ApiResponse(responseCode = ResponseMessage.R500),
     })
-    public Response listarFornecedores(@PathVariable("nome") String nome){
-        return ResponseFactory.ok(service.listarForncedores(nome),ResponseMessage.listagem(Entities.FORNECEDORES_ENTITY.getLabel()));
+    public Response consultarFornecedores(@PathVariable("nome") String nome){
+        return ResponseFactory.ok(service.consultar(CadastroTipo.FORNECEDOR,nome),ResponseMessage.listagem(Entities.FORNECEDORES_ENTITY.getLabel()));
+    }
+    @GetMapping("/tipo/{tipo}/nome/{nome}")
+    @Operation(summary = "Consulta de cadastros por tipo e nome", description = "Retorna uma lista dos cadastros com base no tipo e nome")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = ResponseMessage.R200),
+            @ApiResponse(responseCode = ResponseMessage.R204),
+            @ApiResponse(responseCode = ResponseMessage.R400),
+            @ApiResponse(responseCode = ResponseMessage.R500),
+    })
+    public Response consultar(@PathVariable("tipo") String tipo, @PathVariable("nome") String nome){
+        return ResponseFactory.ok(service.consultar(CadastroTipo.valueOf(tipo.toUpperCase()), nome),ResponseMessage.listagem(Entities.CLIENTE_ENTITY.getLabel()));
+    }
+    @GetMapping("/cpf-cnpj/{cpfCnpj}")
+    @Operation(summary = "Busca cadastro por cpf ou cnpj", description = "Retorna um cadastro pelo cpf ou cnpj")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = ResponseMessage.R200),
+            @ApiResponse(responseCode = ResponseMessage.R204),
+            @ApiResponse(responseCode = ResponseMessage.R400),
+            @ApiResponse(responseCode = ResponseMessage.R500),
+    })
+    public Response buscar(@PathVariable("cpfCnpj") String cpfCnpj){
+        return ResponseFactory.ok(service.buscar(cpfCnpj),ResponseMessage.busca(Entities.CLIENTE_ENTITY.getLabel()));
     }
 }

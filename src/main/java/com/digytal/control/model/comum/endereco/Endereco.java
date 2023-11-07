@@ -38,5 +38,7 @@ public class Endereco {
     @Schema(description="cidade do endereço",subTypes = Cidade.class)
     @Embedded
     private Cidade cidade = new Cidade();
-
+    public String getDomicilio(){
+        return String.format("%s,%s%s,%s-%s/%s - %s", logradouro, numero,complemento, bairro, cidade.getNome(), cidade.getUf(), cep);
+    }
 }

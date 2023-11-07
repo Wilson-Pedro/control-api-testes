@@ -8,11 +8,11 @@ import javax.persistence.*;
 import java.util.List;
 
 @Entity
-@Table(schema = "apl_finaceiro", name = "tab_parcelamento")
+@Table(schema = "apl_financeiro", name = "tab_parcelamento")
 @Data
 public class ParcelamentoEntity extends Movimento {
     @Embedded
-    private ParcelamentoValor valor;
+    private ParcelamentoDetalhe detalhe;
     @OneToMany(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "parc_lancto_id")
     private List<ParcelaEntity> parcelas;

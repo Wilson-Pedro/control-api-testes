@@ -58,7 +58,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList("*"));
-        //configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173","https://digytal-space.netlify.app"));
+        //configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173","https://control-click-web.netlify.app/"));
         configuration.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE","PATCH"));
         //configuration.addAllowedOrigin("*");
         configuration.addAllowedHeader("*");

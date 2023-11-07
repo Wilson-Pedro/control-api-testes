@@ -1,6 +1,7 @@
 package com.digytal.control.model.modulo.financeiro.parcelamento.parcela;
 
-import com.digytal.control.model.modulo.financeiro.parcelamento.ParcelamentoValor;
+import com.digytal.control.model.modulo.financeiro.parcelamento.ParcelamentoDetalhe;
+import com.digytal.control.model.modulo.financeiro.parcelamento.boleto.ParcelaBoleto;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Setter;
@@ -8,7 +9,7 @@ import lombok.Setter;
 import javax.persistence.*;
 
 @Entity
-@Table(schema = "apl_finaceiro", name = "tab_parcelamento_parcela")
+@Table(schema = "apl_financeiro", name = "tab_parcelamento_parcela")
 @Data
 public class ParcelaEntity {
     @Id
@@ -17,13 +18,15 @@ public class ParcelaEntity {
     private Integer id;
     private String descricao;
     @Embedded
-    private ParcelamentoValor valor = new ParcelamentoValor();
+    private ParcelamentoDetalhe detalhe = new ParcelamentoDetalhe();
     @Embedded
     private ParcelaAliquota aliquota = new ParcelaAliquota();
     @Embedded
     private PacelaPendencia pendencia = new PacelaPendencia();
     @Embedded
     private ParcelaQuitacao quitacao = new ParcelaQuitacao();
+    @Embedded
+    private ParcelaBoleto boleto = new ParcelaBoleto();
     @Column(name = "parc_lancto_id", insertable = false, updatable = false)
     private Integer parcelamento;
     private String observacao;

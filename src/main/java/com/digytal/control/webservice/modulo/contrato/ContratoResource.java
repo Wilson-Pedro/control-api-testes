@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.*;
 public class ContratoResource {
     @Autowired
     private ContratoVendaService contratoVendaService;
-    @PostMapping("/venda")
-    public Response pagar(@RequestBody ContratoRequest request){
-        Integer id = contratoVendaService.gravarContrato(request);
+    @PostMapping("/venda-servico")
+    public Response gerarContratoVenda(@RequestBody ContratoRequest request){
+        Integer id = contratoVendaService.gerarContratoVenda(request);
         return ResponseFactory.create(true,String.format("Contrato de Venda de Nº %d gerado com sucesso", id));
 
     }

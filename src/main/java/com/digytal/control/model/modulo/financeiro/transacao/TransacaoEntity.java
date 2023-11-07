@@ -3,11 +3,10 @@ package com.digytal.control.model.modulo.financeiro.transacao;
 import com.digytal.control.model.comum.Participante;
 import com.digytal.control.model.comum.RegistroData;
 import com.digytal.control.model.modulo.acesso.empresa.aplicacao.AplicacaoTipo;
-import com.digytal.control.model.modulo.financeiro.Movimento;
 import com.digytal.control.model.modulo.financeiro.Aplicacao;
-import com.digytal.control.model.modulo.financeiro.Valor;
 import com.digytal.control.model.modulo.financeiro.pagamento.PagamentoEntity;
 import com.digytal.control.model.modulo.financeiro.parcelamento.ParcelamentoEntity;
+import com.digytal.control.model.modulo.financeiro.transacao.rateio.TransacaoRateioEntity;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Setter;
@@ -34,7 +33,7 @@ public class TransacaoEntity{
     @Embedded
     private RegistroData data;
     @Embedded
-    private Valor valor;
+    private TransacaoValor valor;
     @Embedded
     private Participante partes;
     @Column(name = "observacao")
@@ -47,4 +46,7 @@ public class TransacaoEntity{
     @OneToMany(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "transacao_id")
     private List<ParcelamentoEntity> parcelamentos = new ArrayList<>();
+    @OneToMany(cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "transacao_id")
+    private List<TransacaoRateioEntity> rateios = new ArrayList<>();
 }

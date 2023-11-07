@@ -5,6 +5,7 @@ import com.digytal.control.infra.commons.definition.Definition;
 import com.digytal.control.infra.commons.validation.Entities;
 import com.digytal.control.infra.commons.validation.Validations;
 import com.digytal.control.infra.utils.Calculos;
+import com.digytal.control.model.comum.Associacao;
 import com.digytal.control.model.modulo.cadastro.produto.unidademedida.UnidadeMedidaEntity;
 import com.digytal.control.model.modulo.cadastro.produto.unidademedida.UnidadeMedidaRequest;
 import com.digytal.control.model.modulo.cadastro.produto.unidademedida.UnidadeMedidaResponse;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.digytal.control.infra.commons.validation.Attributes.*;
@@ -28,24 +30,6 @@ public class UnidadeMedidaService extends AbstractService {
     @Autowired
     private UnidadeMedidaRepository repository;
 
-    public List<UnidadeMedidaResponse> listar(String nome) {
-        nome = normalizar(Objects.toString(nome, ""));
-        return response(repository.findByOrganizacaoAndLocalizaContaining(requestInfo.getOrganizacao(), nome));
-    }
-    public List<UnidadeMedidaResponse> listar(boolean embalagem) {
-        return response(repository.findByOrganizacaoAndEmbalagem(requestInfo.getOrganizacao(), embalagem));
-    }
-    private List<UnidadeMedidaResponse> response(List<UnidadeMedidaEntity> list){
-        List<UnidadeMedidaResponse> response = list.stream().map(i -> {
-            UnidadeMedidaResponse item = new UnidadeMedidaResponse();
-            BeanUtils.copyProperties(i, item);
-            return item;
-        }).collect(Collectors.toList());
-        if (response.isEmpty()) {
-            throw new ConsultaSemRegistrosException();
-        }
-        return response;
-    }
     public Integer incluir(UnidadeMedidaRequest request) {
         return gravar(null, request);
     }
@@ -59,18 +43,10 @@ public class UnidadeMedidaService extends AbstractService {
         try {
             request.setDescricao(Definition.seNuloOuVazio(request.getDescricao(), request.getNome(), 25));
 
-            Validations.build(SIGLA).notEmpty().maxLen(6).check(request);
+            Validations.build(SIGLA).notEmpty().maxLen(8).check(request);
             Validations.build(NOME).notEmpty().minLen(2).maxLen(25).check(request);
-            Validations.build(DESCRICAO).maxLen(80).check(request);
-
-            UnidadeMedidaEntity entity = new UnidadeMedidaEntity();
-
-            if (id == null) {
-                entity.setOrganizacao(requestInfo.getOrganizacao());
-            } else {
-                entity = repository.findById(id).orElseThrow(() -> new RegistroNaoLocalizadoException(Entities.UNIDADE_MEDIDA_ENTITY, ID));
-            }
-
+            Validations.build(DESCRICAO).maxLen(100).check(request);
+            UnidadeMedidaEntity entity = Optional.ofNullable(id).isPresent() ? repository.findById(id).orElseThrow(() -> new RegistroNaoLocalizadoException(Entities.UNIDADE_MEDIDA_ENTITY, ID)) : new UnidadeMedidaEntity(requestInfo.getOrganizacao());
             BeanUtils.copyProperties(request, entity);
             entity.setConteudo(Calculos.seNuloOuZero(request.getConteudo(), 1.0));
             entity.setLocaliza(normalizar(request.getNome()));
@@ -83,5 +59,34 @@ public class UnidadeMedidaService extends AbstractService {
             log.error(BusinessException.errorMessage("Não foi possível incluir ou alterar a unidade de medida [ %s ]", request.getNome()), ex);
             throw new ErroNaoMapeadoException();
         }
+    }
+    public List<UnidadeMedidaResponse> consultar(String nome) {
+        nome = normalizar(Objects.toString(nome, ""));
+        List<UnidadeMedidaEntity> list = repository.findByOrganizacaoAndLocalizaContaining(requestInfo.getOrganizacao(), nome);
+        List<UnidadeMedidaResponse> response = list.stream().map(this::convert).collect(Collectors.toList());
+        if (response.isEmpty()) {
+            throw new RegistroNaoLocalizadoException(Entities.UNIDADE_MEDIDA_ENTITY, NOME);
+        }
+        return response;
+
+    }
+    public UnidadeMedidaResponse buscar(Integer id){
+        return repository.findById(id).map(this::convert).orElseThrow(()-> new RegistroNaoLocalizadoException(Entities.UNIDADE_MEDIDA_ENTITY, ID));
+    }
+    private UnidadeMedidaResponse convert(UnidadeMedidaEntity entity){
+        UnidadeMedidaResponse response = new UnidadeMedidaResponse();
+        BeanUtils.copyProperties(entity, response);
+        return response;
+    }
+    public List<Associacao> listar(String nome) {
+        return consultar(nome).stream().map(i -> {
+            Associacao item = new Associacao();
+            item.setId(i.getId());
+            item.setIdentificador(i.getId());
+            item.setDescricao(i.getNome());
+            item.setAbreviacao(i.getSigla());
+            return item;
+        }).collect(Collectors.toList());
+
     }
 }

@@ -127,7 +127,7 @@ public class UsuarioService {
         m.setTo(entity.getEmail());
         m.setTitle(template.alteracaoSenhaTitulo());
         m.setBody(template.alteracaoSenhaMensagem(entity.getNome()));
- //       sendEmail.send(m);
+        sendEmail.send(m);
 
         LoginRequest login = new LoginRequest();
         login.setUsuario(entity.getLogin());

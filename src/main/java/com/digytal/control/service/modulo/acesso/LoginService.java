@@ -26,10 +26,8 @@ import static com.digytal.control.infra.commons.validation.Attributes.*;
 
 @Service
 public class LoginService {
-	
     @Autowired
     private UsuarioRepository repository;
-    
     @Autowired
     private EmpresaRepository empresaRepository;
 

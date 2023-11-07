@@ -29,16 +29,12 @@ import static com.digytal.control.infra.commons.validation.Attributes.CPF_CNPJ;
 
 @Service
 public class PrimeiroAcessoService extends CadastroFactory {
-	
     @Autowired
     private ContaRepository contaRepository;
-    
     @Autowired
     private AplicacaoRepository aplicacaoRepository;
-    
     @Autowired
     private FormaPagamentoRepository formaPagamentoRepository;
-    
     @Transactional
     public CredenciamentoResponse configurarPrimeiroAcesso(String cpfCnpj, CadastroSimplificadoRequest request){
         cpfCnpj = Text.onlyDigits(cpfCnpj);
@@ -49,7 +45,6 @@ public class PrimeiroAcessoService extends CadastroFactory {
             if (!Validation.cpfCnpj(cpfCnpj))
                 throw new CpfCnpjInvalidoException();
         }
-        
         EntidadeCadastral registro = build(request);
         EmpresaEntity entity = new EmpresaEntity();
 
@@ -105,10 +100,10 @@ public class PrimeiroAcessoService extends CadastroFactory {
         entity.setBanco(9999);
         entity.setEmpresa(empresa);
         if(pessoaJuridica) {
-            entity.setLegenda("CONTA BALCAO (caixa empresa)");
+            entity.setLegenda("Conta Balcão (caixa empresa)");
             entity.setDescricao("Conta destinada as movimentações financeiras de meio de pagamento em DINHEIRO, conhecida como conta caixa ou balcão");
         }else{
-            entity.setLegenda("CONTA CARTEIRA");
+            entity.setLegenda("Conta Carteira");
             entity.setDescricao("Conta destinada as movimentações financeiras de meio de pagamento em DINHEIRO, conhecida como conta carteira");
         }
         entity.setAgencia("AG01-0");

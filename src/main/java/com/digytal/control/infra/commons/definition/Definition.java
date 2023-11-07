@@ -8,6 +8,12 @@ public class Definition {
     public static String seNulo(String valor, String valorPadrao){
         return Objects.toString(valor, valorPadrao);
     }
+    public static String seNulo(String valor){
+        return Objects.toString(valor, "");
+    }
+    public static String seNuloOuVazio(String valor){
+        return seNuloOuVazio(valor, "");
+    }
     public static String seNuloOuVazio(String valor, String valorPadrao){
         return seNuloOuVazio(valor, valorPadrao, valorPadrao.length());
     }

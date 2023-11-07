@@ -9,9 +9,9 @@ import javax.persistence.Embeddable;
 @Data
 public class ParcelaAliquota {
     @Column(name = "al_multa")
-    private Double aliquotaMulta=0.0;
+    private Double multa=0.0;
     @Column(name = "al_juros")
-    private Double aliquotaJuros=0.0;
+    private Double juros=0.0;
     @Column(name = "al_correcao")
-    private Double aliquotaCorrecao=0.0;
+    private Double correcao=0.0;
 }

@@ -1,5 +1,6 @@
 package com.digytal.control.infra.utils;
 
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
@@ -7,6 +8,7 @@ public class Calculos {
     public static final double ZERO = 0.0;
     public static final int ESCALA4 = 4;
     public static final int ESCALA2 = 2;
+    public static final RoundingMode PADRAO= RoundingMode.HALF_UP;
     enum Operacao{
         SOMAR,
         SUBTRAIR,
@@ -31,6 +33,12 @@ public class Calculos {
     }
     public static Double multiplicar(int escala, Double valorUm, Double valorDois) {
         return calcular(Operacao.MULTIPLICAR, escala, valorUm, valorDois);
+    }
+    public static Double calcularPorcentagem(Double valor, Double aliquota) {
+        return calcularPorcentagem(new BigDecimal(valor), new BigDecimal(aliquota)).doubleValue();
+    }
+    public static BigDecimal calcularPorcentagem(BigDecimal valor, BigDecimal aliquota) {
+        return  valor.multiply(aliquota).divide(new BigDecimal(100.0),ESCALA4, PADRAO).setScale(ESCALA2, RoundingMode.HALF_UP);
     }
     public static Double dividir(Double valorUm, Double valorDois) {
         return dividir(escalaPadrao, valorUm, valorDois);
@@ -89,6 +97,9 @@ public class Calculos {
     public static BigDecimal aplicarEscala(BigDecimal valor){
         return aplicarEscala(escalaPadrao, valor);
     }
+    public static BigDecimal aplicarEscala4(BigDecimal valor){
+        return valor.setScale(ESCALA4, RoundingMode.HALF_EVEN);
+    }
     public static BigDecimal aplicarEscala(int escalaPadrao, BigDecimal valor){
         return valor.setScale(escalaPadrao, RoundingMode.HALF_EVEN);
     }
@@ -104,4 +115,5 @@ public class Calculos {
     public static Double negativar(Double valor, boolean negativar){
         return negativar ? valor * -1 : valor;
     }
+
 }

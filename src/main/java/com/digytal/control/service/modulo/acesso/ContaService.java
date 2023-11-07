@@ -3,14 +3,18 @@ package com.digytal.control.service.modulo.acesso;
 import com.digytal.control.infra.business.RegistroDuplicadoException;
 import com.digytal.control.infra.business.RegistroIncompativelException;
 import com.digytal.control.infra.business.RegistroNaoLocalizadoException;
+import com.digytal.control.infra.commons.validation.Entities;
 import com.digytal.control.infra.commons.validation.Validations;
 import com.digytal.control.model.modulo.acesso.empresa.conta.ContaEntity;
 import com.digytal.control.model.modulo.acesso.empresa.conta.ContaRequest;
 import com.digytal.control.model.modulo.acesso.empresa.conta.ContaResponse;
 import com.digytal.control.model.modulo.acesso.empresa.pagamento.FormaPagamentoEntity;
-import com.digytal.control.model.modulo.acesso.empresa.pagamento.FormaPagamentoRequest;
-import com.digytal.control.model.modulo.acesso.empresa.pagamento.FormaPagamentoResponse;
+import com.digytal.control.model.modulo.acesso.empresa.pagamento.FormaPagamentoCadastroRequest;
+import com.digytal.control.model.modulo.acesso.empresa.pagamento.FormaPagamentoCadastroResponse;
 import com.digytal.control.model.comum.MeioPagamento;
+import com.digytal.control.model.modulo.cadastro.CadastroResponse;
+import com.digytal.control.model.modulo.cadastro.produto.ProdutoEntity;
+import com.digytal.control.model.modulo.cadastro.produto.ProdutoResponse;
 import com.digytal.control.repository.modulo.acesso.empresa.ContaRepository;
 import com.digytal.control.repository.modulo.acesso.empresa.FormaPagamentoRepository;
 import com.digytal.control.service.comum.AbstractService;
@@ -48,13 +52,27 @@ public class ContaService extends AbstractService {
         BeanUtils.copyProperties(entity,response);
         return response;
     }
-    public List<FormaPagamentoResponse> listarFormasPagamento(Integer id){
+    public List<FormaPagamentoCadastroResponse> consultarFormasPagamento(Integer id){
         return formaPagamentoRepository.findByConta(id).stream().map(i->{
-            FormaPagamentoResponse item= new FormaPagamentoResponse();
+            FormaPagamentoCadastroResponse item= new FormaPagamentoCadastroResponse();
             BeanUtils.copyProperties(i,item);
             return item;
         }).collect(Collectors.toList());
     }
+    public List<FormaPagamentoCadastroResponse> consultarFormasPagamento(MeioPagamento meioPagamento){
+       return formaPagamentoRepository.findByEmpresaAndMeioPagamento(requestInfo.getEmpresa(), meioPagamento).stream().map(this::convert).collect(Collectors.toList());
+    }
+    public FormaPagamentoCadastroResponse localizarFormaPagamento(MeioPagamento meioPagamento, Integer numeroParcelas){
+        FormaPagamentoEntity result = formaPagamentoRepository.findByEmpresaAndMeioPagamentoAndNumeroParcelas(requestInfo.getEmpresa(), meioPagamento, numeroParcelas);
+        return convert(result);
+    }
+
+    private FormaPagamentoCadastroResponse convert(FormaPagamentoEntity entity){
+        FormaPagamentoCadastroResponse response = new FormaPagamentoCadastroResponse();
+        BeanUtils.copyProperties(entity, response);
+        return response;
+    }
+
     @Transactional
     public Integer alterar(Integer id, ContaRequest request){
         return gravar( id, request);
@@ -91,7 +109,7 @@ public class ContaService extends AbstractService {
         return entity.getId();
     }
     @Transactional
-    public Integer incluirFormaPagamento(Integer conta, FormaPagamentoRequest request){
+    public Integer incluirFormaPagamento(Integer conta, FormaPagamentoCadastroRequest request){
         Validations.build(CONTA, MEIO_PAGAMENTO).check(request);
 
         if(request.getMeioPagamento() == MeioPagamento.COMPENSACAO || request.getMeioPagamento() == MeioPagamento.SALDO){

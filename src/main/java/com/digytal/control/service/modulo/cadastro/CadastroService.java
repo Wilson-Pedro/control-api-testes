@@ -1,11 +1,13 @@
 package com.digytal.control.service.modulo.cadastro;
 
-import com.digytal.control.infra.business.CpfCnpjInvalidoException;
 import com.digytal.control.infra.business.RegistroDuplicadoException;
+import com.digytal.control.infra.business.RegistroIncompativelException;
 import com.digytal.control.infra.business.RegistroNaoLocalizadoException;
+import com.digytal.control.infra.commons.definition.Definition;
 import com.digytal.control.infra.commons.definition.Text;
 import com.digytal.control.infra.commons.validation.Entities;
-import com.digytal.control.infra.commons.validation.Validation;
+import com.digytal.control.model.comum.cadastramento.CadastroPerfil;
+import com.digytal.control.model.comum.cadastramento.CadastroTipo;
 import com.digytal.control.model.modulo.cadastro.CadastroEntity;
 import com.digytal.control.model.modulo.cadastro.CadastroResponse;
 import com.digytal.control.model.comum.EntidadeCadastral;
@@ -16,13 +18,12 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.digytal.control.infra.commons.validation.Attributes.*;
-import static com.digytal.control.infra.commons.validation.Attributes.EMAIL;
 
 @Service
 public class CadastroService extends CadastroFactory {
@@ -36,48 +37,61 @@ public class CadastroService extends CadastroFactory {
     }
     @Transactional
     private Integer gravar(Integer id, CadastroRequest request){
-        String cpfCnpj = Text.onlyDigits(request.getCpfCnpj());
+        CadastroPerfil perfil = request.getPerfil();
+        if(!perfil.isCliente() && !perfil.isFornecedor())
+            throw new RegistroIncompativelException("Para concluir o cadastro é necessário definí-lo como Cliente ou Fornecedor");
 
-        if (!Validation.cpfCnpj(cpfCnpj))
-            throw new CpfCnpjInvalidoException();
+        request.setCpfCnpj(Definition.seNuloOuVazio(request.getCpfCnpj(), CPF_PADRAO));
+        request.setEmail(Definition.seNuloOuVazio(request.getEmail(), EMAIL_PADRAO));
 
         EntidadeCadastral registroEntity = build(request);
-        CadastroEntity entity = new CadastroEntity();
 
-        if(id!=null) {
-            entity = repository.findById(id).orElseThrow(() -> new RegistroNaoLocalizadoException(Entities.CADASTRO_ENTITY, ID));
-            registroEntity.setOrganizacao(entity.getOrganizacao());
-            checarIntegridadeOrganizacional(registroEntity.getOrganizacao());
-        }else {
-            Integer organizacao = requestInfo.getOrganizacao();
-            if(repository.existsByCpfCnpjAndOrganizacao(request.getCpfCnpj(), organizacao))
-                throw new RegistroDuplicadoException(CPF_CNPJ, cpfCnpj);
+        CadastroEntity entity = Optional.ofNullable(id).isPresent() ? repository.findById(id).
+                orElseThrow(() -> new RegistroNaoLocalizadoException(Entities.CATEGORIA_ENTITY, ID))
+                : new CadastroEntity(requestInfo.getOrganizacao());
+        if (id==null){
+            if(!request.getCpfCnpj().equals(CPF_PADRAO) && repository.existsByCpfCnpjAndOrganizacao(request.getCpfCnpj(), requestInfo.getOrganizacao()))
+                throw new RegistroDuplicadoException(CPF_CNPJ, request.getCpfCnpj());
 
-            if(repository.existsByEmailAndOrganizacao(request.getEmail(),organizacao))
+            if(!request.getEmail().equals(EMAIL_PADRAO) && repository.existsByEmailAndOrganizacao(request.getEmail(), requestInfo.getOrganizacao()))
                 throw new RegistroDuplicadoException(EMAIL, request.getEmail());
 
-            registroEntity.setOrganizacao(organizacao);
+            entity.setIncompleto(CPF_PADRAO.equals(request.getCpfCnpj()) || EMAIL_PADRAO.equals(request.getEmail()) || CEP_PADRAO.equals(request.getEndereco().getCep()));
+        }else{
+            registroEntity.setEmail(entity.getEmail());
+            registroEntity.setCpfCnpj(entity.getCpfCnpj());
         }
+        checarIntegridadeOrganizacional(entity.getOrganizacao());
         BeanUtils.copyProperties(registroEntity, entity);
         BeanUtils.copyProperties(request.getPerfil(), entity.getPerfil());
-        entity.setCpfCnpj(cpfCnpj);
-        entity.setIncompleto(false);
+        entity.setLocaliza(normalizar(registroEntity.getNomeFantasia()));
+
         repository.save(entity);
         return entity.getId();
     }
-    public List<CadastroResponse> listarClientes(String nome){
-        return listar(true,false,nome);
-    }
-    public List<CadastroResponse> listarForncedores(String nome){
-        return listar(false,true,nome);
-    }
-    public List<CadastroResponse> listar(boolean cliente, boolean fornecedor, String nome){
+    public List<CadastroResponse> consultar(CadastroTipo tipo, String nome){
         nome = Objects.toString(nome,"").toUpperCase();
-        List<CadastroResponse> response = repository.listar(requestInfo.getOrganizacao(),cliente,fornecedor, nome).stream().map(i->{
-            CadastroResponse item= new CadastroResponse();
-            BeanUtils.copyProperties(i,item);
-            return item;
-        }).collect(Collectors.toList());
+        CadastroPerfil perfil = definirPerfil(tipo);
+        List<CadastroResponse> response = repository.consultar(requestInfo.getOrganizacao(), perfil.isCliente(), perfil.isFornecedor(), nome).stream().map(this::convert).collect(Collectors.toList());
         return response;
+    }
+    public CadastroResponse buscar(String cpfCnpj){
+        cpfCnpj = Text.onlyDigits(cpfCnpj);
+        return repository.findByOrganizacaoAndCpfCnpj(requestInfo.getOrganizacao(), cpfCnpj).map(this::convert).orElse(null);
+    }
+    private CadastroResponse convert(CadastroEntity entity){
+        CadastroResponse response = new CadastroResponse();
+        BeanUtils.copyProperties(entity, response);
+        return response;
+    }
+    private CadastroPerfil definirPerfil(CadastroTipo tipo){
+        CadastroPerfil perfil = new CadastroPerfil();
+        perfil.setFornecedor(true);
+        perfil.setCliente(true);
+        if(tipo==CadastroTipo.FORNECEDOR)
+            perfil.setCliente(false);
+        if(tipo==CadastroTipo.CLIENTE)
+            perfil.setFornecedor(false);
+        return perfil;
     }
 }

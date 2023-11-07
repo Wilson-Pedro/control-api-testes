@@ -1,6 +1,6 @@
 package com.digytal.control.model.modulo.contrato.request;
 
-import com.digytal.control.model.modulo.financeiro.transacao.TransacaoRateioRequest;
+import com.digytal.control.model.modulo.financeiro.transacao.pagamento.FormaPagamentoRequest;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -25,6 +25,6 @@ public class ContratoRequest {
     private Double valorDescontoManual;
     @Schema(description = "item(ns) do contrato",subTypes = ContratoItemRequest.class)
     private List<ContratoItemRequest> itens;
-    @Schema(description="formas ou rateio de pagamento",subTypes = TransacaoRateioRequest.class)
-    private List<TransacaoRateioRequest> formasPagamento;
+    @Schema(description="formas ou rateio de pagamento",subTypes = FormaPagamentoRequest.class)
+    private List<FormaPagamentoRequest> formasPagamento;
 }

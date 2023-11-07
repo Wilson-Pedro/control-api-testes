@@ -1,19 +1,37 @@
 package com.digytal.control.service.modulo.contrato;
 
+import com.digytal.control.infra.business.RegistroIncompativelException;
+import com.digytal.control.infra.business.RegistroNaoLocalizadoException;
+import com.digytal.control.infra.commons.validation.Attributes;
+import com.digytal.control.infra.commons.validation.Entities;
+import com.digytal.control.infra.utils.Calculos;
+import com.digytal.control.model.comum.RegistroData;
+import com.digytal.control.model.modulo.acesso.empresa.aplicacao.AplicacaoTipo;
+import com.digytal.control.model.modulo.cadastro.produto.ProdutoEntity;
+import com.digytal.control.model.modulo.cadastro.produto.ProdutoItem;
+import com.digytal.control.model.modulo.contrato.*;
+import com.digytal.control.model.modulo.contrato.request.ContratoItemRequest;
+import com.digytal.control.model.modulo.contrato.request.ContratoRequest;
+import com.digytal.control.model.modulo.financeiro.transacao.TransacaoRequest;
+import com.digytal.control.repository.modulo.cadastro.ProdutoRepository;
 import com.digytal.control.service.comum.AbstractService;
+import com.digytal.control.service.modulo.financeiro.TransacaoService;
+import org.springframework.beans.factory.annotation.Autowired;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class ContratoService extends AbstractService {
-    /*
     @Autowired
     private ProdutoRepository produtoRepository;
-
-    @Autowired
-    private PagamentoService pagamentoService;
     protected ContratoEntity build(ContratoTipo tipo, ContratoRequest request){
         return build(tipo, ContratoSituacao.CONCLUIDO, request);
     }
     protected ContratoEntity build(ContratoTipo tipo, ContratoSituacao situacao, ContratoRequest request){
         ContratoEntity entity = new ContratoEntity();
+        if(request.getData()!=null && !request.getData().isEqual(LocalDate.now()))
+            throw new RegistroIncompativelException("Não é permitido o lançamento de contratos com dia diferente de hoje");
+
         entity.setTipo(tipo);
         entity.setSituacao(situacao);
         entity.setNumero(gerarLocalizador());
@@ -21,37 +39,45 @@ public abstract class ContratoService extends AbstractService {
         entity.setPartes(definirParticipantes(request.getCadastro()));
         entity.setIntermediador(request.getIntermediador() == null ? entity.getPartes().getUsuario() : request.getIntermediador());
         entity.setData(RegistroData.of(request.getData()));
-        entity.setPagamentos(conferirPagamentos(request));
+        //entity.setPagamentos(conferirPagamentos(request));
 
-        ContratoCalculo calculo = calcularItens(request.getItens());
-        entity.setItens(calculo.getItens());
+        ContratoCalculoItem calculoItem = calcularItens(request.getItens());
+        entity.setItens(calculoItem.getItens());
 
         ContratoValor valor = new ContratoValor();
+        valor.setPrevisto(calculoItem.getItensTotalPrevisto());
+        valor.setAcrescimoItens(calculoItem.getItensTotalAcrescimo());
+        valor.setDescontoItens(calculoItem.getItensTotalDesconto());
+        valor.setDescontoManual(request.getValorDescontoManual());
+        valor.setAcrescimoPagamento(0.0);
         valor.setAplicado(Calculos.aplicarEscala(Calculos.ESCALA4, request.getValorAplicado()));
-        valor.setPrevisto(calculo.getItensTotalPrevisto());
-        valor.setAcrescimoItens(calculo.getItensTotalAcrescimo());
-        valor.setAcrescimoPagamento(entity.getPagamentos().stream().mapToDouble(p -> Calculos.subtrair(Calculos.ESCALA4, p.getValorPago(), p.getValorOriginal())).sum());
-        valor.setDescontoItens(calculo.getItensTotalDesconto());
-        valor.setDescontoManual(0.0);
+        valor.setAcrescimoPagamento(request.getFormasPagamento().stream().mapToDouble(p -> Calculos.subtrair(Calculos.ESCALA4, p.getValorPago(), p.getValorOriginal())).sum());
         entity.setValor(valor);
-        conferirValores(valor.getAplicado(), valor.getAcrescimoPagamento(), calculo.getItensTotalAplicado() );
-        processarPagamentos(tipo,entity, request.getFormasPagamento());
+        //conferirValores(valor, calculo.getItensTotalAplicado() );
+        processarTransacao(tipo.getAplicacao(), request);
         return entity;
     }
-    private void conferirValores(Double valorAplicado, Double valorAcrescimentoPagamento, Double valorTotalItens){
-        Double subtotal = Calculos.subtrair(valorAplicado, valorAcrescimentoPagamento);
+    private void conferirValores(ContratoValor valor){
+
+        /*
+        Double  t = va
+        Double subtotal = Calculos.subtrair(valor.getAplicado(), valor.getAcrescimoPagamento());
+
         if(!Calculos.compararIgualdade(subtotal, valorTotalItens))
             throw new RegistroIncompativelException("É necessário revisar os valores informados");
-
+        */
     }
-    private ContratoCalculo calcularItens(List<ContratoItemRequest> itens){
-        ContratoCalculo calculo = new ContratoCalculo();
+    private ContratoCalculoItem calcularItens(List<ContratoItemRequest> itens){
+        if(itens==null || itens.size()==0)
+            throw new RegistroIncompativelException("É necessário informar ao menos um produto ou serviço para a geração do contrato");
+
+        ContratoCalculoItem calculo = new ContratoCalculoItem();
+
         List<ContratoItemEntity> list = new ArrayList<>();
         itens.stream().forEach(i->{
             ContratoItemEntity item = new ContratoItemEntity();
             item.setDescricao(i.getDescricao());
             item.setProduto(produtoItem(i.getProduto()));
-
             item.setQuantidade(Calculos.aplicarEscala(Calculos.ESCALA4,i.getQuantidade()));
             item.setValorUnitario(Calculos.aplicarEscala(Calculos.ESCALA4,i.getValorUnitario()));
             item.setValorAplicado(Calculos.aplicarEscala(Calculos.ESCALA4,i.getValorAplicado()));
@@ -61,7 +87,7 @@ public abstract class ContratoService extends AbstractService {
             calculo.setItensTotalPrevisto(Calculos.somar(Calculos.ESCALA4,calculo.getItensTotalPrevisto(), item.getValorPrevisto()));
             calculo.setItensTotalAplicado(Calculos.somar(Calculos.ESCALA4,calculo.getItensTotalAplicado(), item.getValorAplicado()));
             if (Calculos.compararMenorQue(variacao, 0.0))
-                calculo.setItensTotalDesconto(Calculos.somar(Calculos.ESCALA4,calculo.getItensTotalDesconto(), variacao));
+                calculo.setItensTotalDesconto(Math.abs(Calculos.somar(Calculos.ESCALA4,calculo.getItensTotalDesconto(), variacao)));
             else
                 calculo.setItensTotalAcrescimo(Calculos.somar(Calculos.ESCALA4,calculo.getItensTotalAcrescimo(), variacao));
             list.add(item);
@@ -76,37 +102,21 @@ public abstract class ContratoService extends AbstractService {
         item.setSaldo(entity.getSaldo());
         item.setCodigoBarras(entity.getCodigoBarras());
         item.setTaxaLiquidacao(entity.getTaxaLiquidacao());
-        item.setUnidadeMedidaSigla(String.valueOf(entity.getUnidadeEmbalagem()));
+        item.setUnidadeMedidaSigla(String.valueOf(entity.getUnidadeMedidaSigla()));
         item.setPreco(entity.getValor());
         return item;
     }
-    private List<ContratoPagamentoEntity> conferirPagamentos(ContratoRequest request){
-        List<ContratoPagamentoEntity> pagamentos = new ArrayList<>();
-        if(request.getFormasPagamento()==null)
-            request.setFormasPagamento(pagamentoService.definirPagamentoPadrao(request.getValorAplicado()));
-        request.getFormasPagamento().forEach(pagto->{
-            if(pagto.getMeioPagamento() == null)
-                throw new CampoObrigatorioException(Attributes.MEIO_PAGAMENTO);
-
-            ContratoPagamentoEntity entity = new ContratoPagamentoEntity();
-            BeanUtils.copyProperties(pagto,entity);
-            entity.setValorOriginal(entity.getValorOriginal() == null ? entity.getValorPago() : entity.getValorOriginal());
-            entity.setTaxaPagamento(entity.getTaxaPagamento() == null ? 0.0 : entity.getTaxaPagamento());
-            pagamentos.add(entity);
-        });
-        return pagamentos;
+    @Autowired
+    private TransacaoService transacaoService;
+    private void processarTransacao(AplicacaoTipo tipo, ContratoRequest request){
+        TransacaoRequest transacao = new TransacaoRequest();
+        transacao.setData(request.getData());
+        transacao.setValor(request.getValorAplicado());
+        transacao.setCadastro(request.getCadastro());
+        transacao.setDescricao("Venda \\ Serviço");
+        transacao.setObservacao("");
+        transacao.setTitulo("Venda \\ Serviço");
+        transacao.setFormasPagamento(request.getFormasPagamento());
+        transacaoService.incluir(tipo,transacao);
     }
-    private void processarPagamentos(ContratoTipo tipo, ContratoEntity entity, List<TransacaoRateioRequest> pagamentos){
-
-        AplicacaoTipo aplicacaoTipo = ContratoTipo.COMPRA == tipo ? AplicacaoTipo.DESPESA : AplicacaoTipo.RECEITA;
-        PagamentoRequest request = new PagamentoRequest();
-        request.setDescricao(tipo.getDescricao() + " " + request.getNumeroDocumento());
-        request.setValor(entity.getValor().getAplicado());
-        request.setCadastro(entity.getPartes().getCadastro());
-        request.setData(entity.getData().getDia());
-        request.setFormasPagamento(pagamentos);
-        pagamentoService.incluir(aplicacaoTipo,request, entity.getNumero());
-    }
-
-     */
 }

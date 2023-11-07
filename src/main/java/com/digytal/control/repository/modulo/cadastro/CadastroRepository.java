@@ -6,10 +6,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface CadastroRepository extends JpaRepository<CadastroEntity, Integer> {
     boolean existsByCpfCnpjAndOrganizacao(String cpfCnpj, Integer organizacao);
     boolean existsByEmailAndOrganizacao(String email,Integer organizacao);
-    @Query("SELECT e FROM CadastroEntity e WHERE e.organizacao=:organizacao AND e.perfil.cliente=:cliente AND e.perfil.fornecedor=:fornecedor AND e.nomeFantasia LIKE %:nome% ORDER BY e.nomeFantasia")
-    List<CadastroEntity> listar(@Param("organizacao") Integer organizacao, @Param("cliente") boolean cliente, @Param("fornecedor") boolean fornecedor, @Param("nome") String nome);
+    Optional<CadastroEntity> findByOrganizacaoAndCpfCnpj(Integer organizacao, String cpfCnpj);
+    @Query("SELECT e FROM CadastroEntity e WHERE (e.perfil.cliente=:cliente OR e.perfil.fornecedor=:fornecedor) AND (e.organizacao=:organizacao  AND e.localiza LIKE %:nome% )ORDER BY e.nomeFantasia")
+    List<CadastroEntity> consultar(@Param("organizacao") Integer organizacao, @Param("cliente") boolean cliente, @Param("fornecedor") boolean fornecedor, @Param("nome") String nome);
 }

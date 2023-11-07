@@ -8,6 +8,7 @@ import java.util.List;
 
 public interface FormaPagamentoRepository extends JpaRepository<FormaPagamentoEntity, Integer> {
     List<FormaPagamentoEntity> findByConta(Integer conta);
-    boolean existsByEmpresaAndMeioPagamentoAndNumeroParcelas(Integer empresa, MeioPagamento formaPagamento, Integer numeroParcelas);
+    boolean existsByEmpresaAndMeioPagamentoAndNumeroParcelas(Integer empresa, MeioPagamento meioPagamento, Integer numeroParcelas);
+    List<FormaPagamentoEntity> findByEmpresaAndMeioPagamento(Integer empresa, MeioPagamento meioPagamento);
     FormaPagamentoEntity findByEmpresaAndMeioPagamentoAndNumeroParcelas(Integer empresa, MeioPagamento meioPagamento, Integer numeroParcelas);
 }

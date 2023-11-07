@@ -18,4 +18,10 @@ public class CadastroEntity extends EntidadeCadastral {
     @Embedded
     private CadastroIntegracao integracao;
     private String localiza;
+    public CadastroEntity(){
+
+    }
+    public CadastroEntity(Integer organizacao){
+        this.organizacao = organizacao;
+    }
 }

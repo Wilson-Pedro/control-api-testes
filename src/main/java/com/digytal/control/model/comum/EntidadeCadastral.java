@@ -37,7 +37,7 @@ public class EntidadeCadastral {
     @Column(name = "ativ_com_prof")
     private String atividadeComecialProfissional="";
     @Column(name = "organizacao_id")
-    private Integer organizacao;
+    protected Integer organizacao;
     @Column(name = "is_incompleto")
     private boolean incompleto;
 }

@@ -1,6 +1,7 @@
 package com.digytal.control.webservice.publico;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -20,6 +21,9 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.digytal.control.infra.model.CredenciamentoResponse;
 import com.digytal.control.model.comum.cadastramento.CadastroSimplificadoRequest;
+import com.digytal.control.model.modulo.acesso.usuario.SenhaAlteracaoRequest;
+import com.digytal.control.model.modulo.acesso.usuario.UsuarioEntity;
+import com.digytal.control.repository.modulo.acesso.UsuarioRepository;
 import com.digytal.control.service.modulo.acesso.PrimeiroAcessoService;
 import com.digytal.control.service.modulo.acesso.UsuarioService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,6 +39,8 @@ class PublicoResourceTest {
 
 	PrimeiroAcessoService primeiroAcessoService = mock(PrimeiroAcessoService.class);
 	
+	UsuarioRepository usuarioRepository = mock(UsuarioRepository.class);
+	
 	@Autowired
 	private ObjectMapper objectMapper;
 	
@@ -47,6 +53,8 @@ class PublicoResourceTest {
 	
 	CredenciamentoResponse responseExpected = new CredenciamentoResponse();
 	
+	UsuarioEntity entity = new UsuarioEntity();
+	
 	@BeforeEach
 	void setup() {
 		request.setNomeFantasia("BOLSAS BR");
@@ -58,22 +66,24 @@ class PublicoResourceTest {
 		responseExpected.setLogin(cpfCnpj);
 		responseExpected.setNome(request.getNomeFantasia());
 		responseExpected.setToken("a04c5f3a");
+		
+		entity.setExpirado(false);
 	}
 
 	
 	@Test
 	void deveRealizarPrimeiroAcessoDaEmpresaComSucesso() throws Exception {
 		
-		final var cpfCnpj = "31648098000111";
+		final var cpfCnpj = "09495101000155";
 		
 		final var request = this.request;
-		request.setNomeFantasia("CONSOLES BR");
-		request.setSobrenomeSocial("CONSOLES BRASIL");
-		request.setEmail("brasil.consoles@hotmail.com.br");
+		request.setNomeFantasia("CANETAS RS");
+		request.setSobrenomeSocial("CANETAS RAFAEL SILVA");
+		request.setEmail("silva.rafael@hotmail.com.br");
 		
 		final var responseExpected = this.responseExpected;
 		responseExpected.setExpiracao(1698955585275L);
-		responseExpected.setUsuario(17);
+		responseExpected.setUsuario(21);
 		responseExpected.setLogin(cpfCnpj);
 		responseExpected.setNome(request.getNomeFantasia());
 		responseExpected.setToken("5h7p9k2q");
@@ -96,24 +106,33 @@ class PublicoResourceTest {
 		verify(this.primeiroAcessoService, times(1)).configurarPrimeiroAcesso(cpfCnpj, request);
 	}
 	
-//	@Test
-//	void deveAlterarSenhaApartirDaExpiracaoComSucesso() throws Exception {
-//		
-//		SenhaAlteracaoRequest senhaAlterada = new SenhaAlteracaoRequest();
-//		senhaAlterada.setUsuario(8);
-//		senhaAlterada.setSenhaAtual("asd123");
-//		senhaAlterada.setNovaSenha("Str0ngP@ss");
-//		senhaAlterada.setNovaSenhaConfirmacao("Str0ngP@ss");
-//		
-//		String jsonRequest = objectMapper.writeValueAsString(senhaAlterada);
-//		Long expiracao = 1698259381769L;
-//		
-//		mockMvc.perform(patch("/public/alteracao-senha/{expiracao}", expiracao)
-//				.contentType(MediaType.APPLICATION_JSON)
-//				.content(jsonRequest))
-//				.andExpect(status().isOk())
-//				.andReturn();
-//	}
+	@Test
+	void deveAlterarSenhaApartirDaExpiracaoComSucesso() throws Exception {
+		
+		SenhaAlteracaoRequest senhaAlterada = new SenhaAlteracaoRequest();
+		senhaAlterada.setUsuario(12);
+		senhaAlterada.setSenhaAtual("a529f572");
+		senhaAlterada.setNovaSenha("sEnh4Str0ng!");
+		senhaAlterada.setNovaSenhaConfirmacao("sEnh4Str0ng!");
+		
+		String jsonRequest = objectMapper.writeValueAsString(senhaAlterada);
+		Long expiracao = 1699385650862L;
+		
+		UsuarioEntity usuarioExpected = this.entity;
+		usuarioExpected.setSenha(senhaAlterada.getNovaSenha());
+		
+		when(usuarioRepository.save(usuarioExpected)).thenReturn(usuarioExpected);
+		
+		mockMvc.perform(patch("/public/alteracao-senha/{expiracao}", expiracao)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(jsonRequest))
+				.andExpect(status().isOk())
+				.andReturn();
+		
+		UsuarioEntity usuario = this.usuarioRepository.save(usuarioExpected);
+		
+		assertEquals(senhaAlterada.getNovaSenha(), usuario.getSenha());
+	}
 	
 	@Test
 	void deveSolicitarNovaSenhaApartirDoIdComSucesso() throws Exception {

@@ -46,9 +46,7 @@ public class SwaggerConfig {
     */
     @Bean
     public GroupedOpenApi apiPagamento() {
-        String paths[] = {"/pagamentos/**"};
-        String packagesToscan[] = {TransacaoResource.class.getPackage().getName()};
-        return GroupedOpenApi.builder().group("Pagamentos").pathsToMatch(paths).packagesToScan(packagesToscan).build();
+        return GroupedOpenApi.builder().group("Pagamentos").packagesToScan(TransacaoResource.class.getPackage().getName()).build();
     }
     @Bean
     public GroupedOpenApi apiParagamentoResumoDiario() {

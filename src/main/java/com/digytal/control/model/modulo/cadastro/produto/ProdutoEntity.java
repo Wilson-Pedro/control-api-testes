@@ -16,15 +16,17 @@ public class ProdutoEntity {
     private Integer id;
     private String nome;
     private String localiza;
-    private String icone;
+    private String descricao;
     @Column(name = "is_principal")
     private boolean principal;
     @Column(name = "nome_abreviado")
     private String nomeAbreviado;
-    @Column(name = "unid_embalagem")
+    @Column(name = "unid_embalagem_id")
     private Integer unidadeEmbalagem;
     @Column(name = "unid_medida_id")
     private Integer unidadeMedida;
+    @Column(name = "unid_medida_sigla")
+    private String unidadeMedidaSigla;
     @Column(name = "cod_barras")
     private String codigoBarras;
     private String sku;
@@ -32,7 +34,7 @@ public class ProdutoEntity {
     private Double valor;
     @Column(name = "tx_liquidacao")
     private Double taxaLiquidacao;
-    @Column(name = "fl_excluido")
+    @Column(name = "is_excluido")
     private boolean excluido;
     @Column(name = "is_servico")
     private boolean servico;

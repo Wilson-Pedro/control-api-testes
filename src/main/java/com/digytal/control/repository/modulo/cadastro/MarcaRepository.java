@@ -8,6 +8,5 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 @Repository
 public interface MarcaRepository extends JpaRepository<MarcaEntity, Integer>{
-    List<MarcaEntity> findByOrganizacaoAndNomeContaining(Integer organizacao, String nome);
     List<MarcaEntity> findByOrganizacaoAndLocalizaContaining(Integer organizacao, String nome);
 }

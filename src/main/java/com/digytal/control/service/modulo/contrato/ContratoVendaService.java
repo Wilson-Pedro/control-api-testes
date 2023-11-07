@@ -17,8 +17,7 @@ public class ContratoVendaService extends ContratoService{
     @Autowired
     private ContratoRepository repository;
     @Transactional
-    public Integer gravarContrato(ContratoRequest request){
-        /*
+    public Integer gerarContratoVenda(ContratoRequest request){
         try {
             ContratoEntity entity = build(ContratoTipo.VENDA, request);
             repository.save(entity);
@@ -30,8 +29,5 @@ public class ContratoVendaService extends ContratoService{
             log.error("Erro ao tentar gerar um contrato de venda",ex);
             throw new ErroNaoMapeadoException();
         }
-        *
-         */
-        return null;
     }
 }

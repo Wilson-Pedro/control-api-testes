@@ -9,9 +9,9 @@ public class CadastroSimplificadoRequest {
     @Schema(description="primeiro nome ou nome fantasia", maxLength = 50,example = "LOJAS E ACESSORIOS PRODUTOS IMPORTADOS",requiredMode = Schema.RequiredMode.REQUIRED)
     private String nomeFantasia;
 
-    @Schema(description="sobrenome ou razão social", maxLength = 50,example = "J & R IMPORTADOS LTDA",requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description="sobrenome ou razão social", maxLength = 50,example = "J & R IMPORTADOS LTDA")
     private String sobrenomeSocial;
 
-    @Schema(description="conta de e-mail da empresa", maxLength = 70,example = "contato@jrimportados.com",requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description="conta de e-mail da empresa", maxLength = 70,example = "contato@jrimportados.com")
     private String email;
 }

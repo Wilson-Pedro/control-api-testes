@@ -12,7 +12,7 @@ import java.time.LocalDate;
 public class CadastroCompletoRequest extends CadastroSimplificadoRequest {
     @Schema(description = "telefone",subTypes = Telefone.class)
     private Telefone telefone = new Telefone();
-    @Schema(description = "CPF ou CNPJ",minLength = 11,maxLength = 14,example = "58777339000189",requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "CPF ou CNPJ",minLength = 11,maxLength = 14,example = "58777339000189")
     private String cpfCnpj;
     @Schema(description = "RG (Registro Geral) ou LE (Inscrição Estadual)",minLength = 7,maxLength = 9,example = "15463342")
     private String rgIe;

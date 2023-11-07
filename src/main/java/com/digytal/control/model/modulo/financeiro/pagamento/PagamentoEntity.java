@@ -1,7 +1,6 @@
 package com.digytal.control.model.modulo.financeiro.pagamento;
 
-import com.digytal.control.model.comum.MeioPagamento;
-import com.digytal.control.model.modulo.financeiro.Valor;
+import com.digytal.control.model.modulo.financeiro.transacao.TransacaoValor;
 import com.digytal.control.model.modulo.financeiro.Movimento;
 import lombok.Data;
 import javax.persistence.*;
@@ -12,5 +11,7 @@ public class PagamentoEntity extends Movimento {
     @Column(name = "conta_id")
     private Integer conta;
     @Embedded
-    private Valor valor;
+    private TransacaoValor valor;
+    @Column(name = "parcelamento_id")
+    private Integer parcelamento;
 }

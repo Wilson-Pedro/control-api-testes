@@ -2,7 +2,7 @@ package com.digytal.control.webservice.modulo.financeiro.consulta;
 
 import com.digytal.control.infra.http.response.Response;
 import com.digytal.control.infra.http.response.ResponseFactory;
-import com.digytal.control.model.consulta.lancamentos.PagamentoFiltro;
+import com.digytal.control.model.consulta.lancamento.PagamentoFiltro;
 import com.digytal.control.service.modulo.financeiro.consulta.PagamentoConsultaService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +18,6 @@ public class PagamentoResumoDiarioResource {
     private PagamentoConsultaService service;
     @GetMapping()
     public Response exibirResumoDiario(){
-        return ResponseFactory.ok(service.resumirPagamentos(PagamentoFiltro.of()),"Consulta realizada com sucesso!");
+        return ResponseFactory.ok(service.resumir(new PagamentoFiltro()),"Consulta realizada com sucesso!");
     }
 }
