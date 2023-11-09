@@ -1,10 +1,12 @@
 package com.digytal.control.webservice.publico;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -25,8 +27,10 @@ import com.digytal.control.infra.model.LoginRequest;
 import com.digytal.control.infra.model.SessaoResponse;
 import com.digytal.control.infra.model.usuario.UsuarioResponse;
 import com.digytal.control.model.comum.cadastramento.CadastroSimplificadoRequest;
+import com.digytal.control.model.modulo.acesso.usuario.SenhaAlteracaoRequest;
 import com.digytal.control.model.modulo.acesso.usuario.UsuarioEntity;
 import com.digytal.control.repository.modulo.acesso.UsuarioRepository;
+import com.digytal.control.service.modulo.acesso.EmpresaService;
 import com.digytal.control.service.modulo.acesso.LoginService;
 import com.digytal.control.service.modulo.acesso.PrimeiroAcessoService;
 import com.digytal.control.service.modulo.acesso.UsuarioService;
@@ -44,6 +48,8 @@ class PublicoResourceTest {
 	PrimeiroAcessoService primeiroAcessoService = mock(PrimeiroAcessoService.class);
 	
 	LoginService loginService = mock(LoginService.class);
+	
+	EmpresaService empresaService = mock(EmpresaService.class);
 	
 	UsuarioRepository usuarioRepository = mock(UsuarioRepository.class);
 	
@@ -77,68 +83,68 @@ class PublicoResourceTest {
 	}
 
 	
-//	@Test
-//	void deveRealizarPrimeiroAcessoDaEmpresaComSucesso() throws Exception {
-//		
-//		final var cpfCnpj = "09495101000155";
-//		
-//		final var request = this.request;
-//		request.setNomeFantasia("CANETAS RS");
-//		request.setSobrenomeSocial("CANETAS RAFAEL SILVA");
-//		request.setEmail("silva.rafael@hotmail.com.br");
-//		
-//		final var responseExpected = this.responseExpected;
-//		responseExpected.setExpiracao(1698955585275L);
-//		responseExpected.setUsuario(21);
-//		responseExpected.setLogin(cpfCnpj);
-//		responseExpected.setNome(request.getNomeFantasia());
-//		responseExpected.setToken("5h7p9k2q");
-//		
-//		when(this.primeiroAcessoService.configurarPrimeiroAcesso(cpfCnpj, request))
-//		.thenReturn(responseExpected);
-//		
-//		CredenciamentoResponse response = this.primeiroAcessoService.configurarPrimeiroAcesso(cpfCnpj, request);
-//		
-//		String jsonRequest = objectMapper.writeValueAsString(request);
-//		
-//		mockMvc.perform(post("/public/empresa/primeiro-acesso/{cpfCnpj}", cpfCnpj)
-//				.contentType(MediaType.APPLICATION_JSON)
-//				.content(jsonRequest)
-//				.param("cpfCnpj", cpfCnpj))
-//				.andExpect(status().isOk())
-//				.andReturn();
-//		
-//		assertThat(response).usingRecursiveComparison().isEqualTo(responseExpected);
-//		verify(this.primeiroAcessoService, times(1)).configurarPrimeiroAcesso(cpfCnpj, request);
-//	}
+	@Test
+	void deveRealizarPrimeiroAcessoDaEmpresaComSucesso() throws Exception {
+		
+		final var cpfCnpj = "16737489000119";
+		
+		final var request = this.request;
+		request.setNomeFantasia("FONES BR");
+		request.setSobrenomeSocial("FONES BRASIL");
+		request.setEmail("fones.brasil@hotmail.com.br");
+		
+		final var responseExpected = this.responseExpected;
+		responseExpected.setExpiracao(1698955585275L);
+		responseExpected.setUsuario(24);
+		responseExpected.setLogin(cpfCnpj);
+		responseExpected.setNome(request.getNomeFantasia());
+		responseExpected.setToken("5h7p9k2q");
+		
+		when(this.primeiroAcessoService.configurarPrimeiroAcesso(cpfCnpj, request))
+		.thenReturn(responseExpected);
+		
+		CredenciamentoResponse response = this.primeiroAcessoService.configurarPrimeiroAcesso(cpfCnpj, request);
+		
+		String jsonRequest = objectMapper.writeValueAsString(request);
+		
+		mockMvc.perform(post("/public/empresa/primeiro-acesso/{cpfCnpj}", cpfCnpj)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(jsonRequest)
+				.param("cpfCnpj", cpfCnpj))
+				.andExpect(status().isOk())
+				.andReturn();
+		
+		assertThat(response).usingRecursiveComparison().isEqualTo(responseExpected);
+		verify(this.primeiroAcessoService, times(1)).configurarPrimeiroAcesso(cpfCnpj, request);
+	}
 	
-//	@Test
-//	void deveAlterarSenhaApartirDaExpiracaoComSucesso() throws Exception {
-//		
-//		SenhaAlteracaoRequest senhaAlterada = new SenhaAlteracaoRequest();
-//		senhaAlterada.setUsuario(12);
-//		senhaAlterada.setSenhaAtual("a529f572");
-//		senhaAlterada.setNovaSenha("sEnh4Str0ng!");
-//		senhaAlterada.setNovaSenhaConfirmacao("sEnh4Str0ng!");
-//		
-//		String jsonRequest = objectMapper.writeValueAsString(senhaAlterada);
-//		Long expiracao = 1699385650862L;
-//		
-//		UsuarioEntity usuarioExpected = this.entity;
-//		usuarioExpected.setSenha(senhaAlterada.getNovaSenha());
-//		
-//		when(usuarioRepository.save(usuarioExpected)).thenReturn(usuarioExpected);
-//		
-//		mockMvc.perform(patch("/public/alteracao-senha/{expiracao}", expiracao)
-//				.contentType(MediaType.APPLICATION_JSON)
-//				.content(jsonRequest))
-//				.andExpect(status().isOk())
-//				.andReturn();
-//		
-//		UsuarioEntity usuario = this.usuarioRepository.save(usuarioExpected);
-//		
-//		assertEquals(senhaAlterada.getNovaSenha(), usuario.getSenha());
-//	}
+	@Test
+	void deveAlterarSenhaApartirDaExpiracaoComSucesso() throws Exception {
+		
+		SenhaAlteracaoRequest senhaAlterada = new SenhaAlteracaoRequest();
+		senhaAlterada.setUsuario(11);
+		senhaAlterada.setSenhaAtual("545befe5");
+		senhaAlterada.setNovaSenha("br4s1lH3x@!");
+		senhaAlterada.setNovaSenhaConfirmacao("br4s1lH3x@!");
+		
+		String jsonRequest = objectMapper.writeValueAsString(senhaAlterada);
+		Long expiracao = 1699555877732L;
+		
+		UsuarioEntity usuarioExpected = this.entity;
+		usuarioExpected.setSenha(senhaAlterada.getNovaSenha());
+		
+		when(usuarioRepository.save(usuarioExpected)).thenReturn(usuarioExpected);
+		
+		mockMvc.perform(patch("/public/alteracao-senha/{expiracao}", expiracao)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(jsonRequest))
+				.andExpect(status().isOk())
+				.andReturn();
+		
+		UsuarioEntity usuario = this.usuarioRepository.save(usuarioExpected);
+		
+		assertEquals(senhaAlterada.getNovaSenha(), usuario.getSenha());
+	}
 	
 	@Test
 	void deveRealizarLoginComSucesso() throws Exception {
@@ -177,6 +183,25 @@ class PublicoResourceTest {
 		
 		assertThat(session).usingRecursiveComparison().isEqualTo(sessionExpected);
 		verify(loginService, times(1)).autenticar(login);
+	}
+	
+	@Test
+	void deveSelecionarEmpresaComSucesso() throws Exception {
+		
+		Integer empresa = 2;
+		String tokenExpected = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI2OTA1OTMxMjAwMDE3NyIsImlhdCI6MTY5OTU0OTc4MCwiZXhwIjoxNjk5NTY0MTgwLCJhdXRob3JpdGllcyI6WyJST0xFX0FETUlOIl0sInVzdWFyaW8iOjIsImVtcHJlc2EiOjIsIm9yZ2FuaXphY2FvIjoyLCJ2YWxpZG8iOnRydWV9.64MLuWj2xA_qg0zO5OeANdkuQJJ_YRVts-B0XVqJDngs848YWeKs83-xCLeFZvXEmkSKb5OEVams45e1T3FeKw";
+		
+		when(this.empresaService.selecionarEmpresa(empresa, tokenExpected)).thenReturn(tokenExpected);
+		
+		mockMvc.perform(get("/public/empresas/selecao/{empresa}", empresa)
+				.header("authorization", "Bearer " + tokenExpected))
+				.andExpect(status().isOk())
+				.andReturn();
+		
+		String token = this.empresaService.selecionarEmpresa(empresa, tokenExpected);
+		
+		assertEquals(token, tokenExpected);
+		verify(empresaService, times(1)).selecionarEmpresa(empresa, token);
 	}
 	
 	@Test
