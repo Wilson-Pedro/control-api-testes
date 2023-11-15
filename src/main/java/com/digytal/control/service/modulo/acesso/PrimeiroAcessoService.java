@@ -29,12 +29,16 @@ import static com.digytal.control.infra.commons.validation.Attributes.CPF_CNPJ;
 
 @Service
 public class PrimeiroAcessoService extends CadastroFactory {
+	
     @Autowired
     private ContaRepository contaRepository;
+    
     @Autowired
     private AplicacaoRepository aplicacaoRepository;
+    
     @Autowired
     private FormaPagamentoRepository formaPagamentoRepository;
+    
     @Transactional
     public CredenciamentoResponse configurarPrimeiroAcesso(String cpfCnpj, CadastroSimplificadoRequest request){
         cpfCnpj = Text.onlyDigits(cpfCnpj);
@@ -45,9 +49,9 @@ public class PrimeiroAcessoService extends CadastroFactory {
             if (!Validation.cpfCnpj(cpfCnpj))
                 throw new CpfCnpjInvalidoException();
         }
+        
         EntidadeCadastral registro = build(request);
         EmpresaEntity entity = new EmpresaEntity();
-
         OrganizacaoEntity organizacao = cadastrarOrganizacao(cpfCnpj, request.getNomeFantasia().concat(" ").concat(request.getSobrenomeSocial()), request.getEmail());
 
         BeanUtils.copyProperties(registro, entity);
