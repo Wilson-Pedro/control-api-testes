@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.digytal.control.infra.model.CredenciamentoResponse;
@@ -44,10 +45,17 @@ class PublicoResourceTest {
 	
 	String cpfCnpj = "52340615000160";
 	
-	PublicoResource publicoResource = mock(PublicoResource.class);
+	@InjectMocks
+	PublicoResource publicoResource;
 	
 	@Autowired
 	UsuarioService  usuarioService;
+	
+	@Autowired
+	UsuarioRepository usuarioRepository;
+	
+	@Autowired
+    private PasswordEncoder encoder;
 
 	@Autowired
 	PrimeiroAcessoService primeiroAcessoService;
@@ -55,8 +63,6 @@ class PublicoResourceTest {
 	LoginService loginService = mock(LoginService.class);
 	
 	EmpresaService empresaService = mock(EmpresaService.class);
-	
-	UsuarioRepository usuarioRepository = mock(UsuarioRepository.class);
 	
 	@Autowired
 	private ObjectMapper objectMapper;
@@ -66,15 +72,12 @@ class PublicoResourceTest {
 	
 	CadastroSimplificadoRequest request = new CadastroSimplificadoRequest();
 	
-	UsuarioEntity entity = new UsuarioEntity();
-	
 	@BeforeEach
 	void setup() {
 		request.setNomeFantasia("SUCOS MT");
 		request.setSobrenomeSocial("SUCOS MARIA TEREZA");
 		request.setEmail("maria.tereza@hotmail.com.br");
 		
-		entity.setExpirado(false);
 	}
 
 	
@@ -88,8 +91,6 @@ class PublicoResourceTest {
 		request.setSobrenomeSocial("RADIOS BRUNO RIBEIRO");
 		request.setEmail("ribeiro.bruno@hotmail.com.br");
 		
-		CredenciamentoResponse response = this.primeiroAcessoService.configurarPrimeiroAcesso(cpfCnpj, request);
-		
 //		String jsonRequest = objectMapper.writeValueAsString(request);
 //		
 //		mockMvc.perform(post("/public/empresa/primeiro-acesso/{cpfCnpj}", cpfCnpj)
@@ -98,6 +99,8 @@ class PublicoResourceTest {
 //				.param("cpfCnpj", cpfCnpj))
 //				.andExpect(status().isOk())
 //				.andReturn();
+		
+		CredenciamentoResponse response = this.primeiroAcessoService.configurarPrimeiroAcesso(cpfCnpj, request);
 		
 		assertNotEquals(null, response.getExpiracao());
 		assertNotEquals(null, response.getUsuario());
@@ -109,33 +112,41 @@ class PublicoResourceTest {
 		assertEquals(request.getNomeFantasia(), response.getNome());
 	}
 	
-//	@Test
-//	void deveAlterarSenhaApartirDaExpiracaoComSucesso() throws Exception {
-//		
-//		SenhaAlteracaoRequest senhaAlterada = new SenhaAlteracaoRequest();
-//		senhaAlterada.setUsuario(5);
-//		senhaAlterada.setSenhaAtual("56b39f70");
-//		senhaAlterada.setNovaSenha("Livr0sBr4sil!");
-//		senhaAlterada.setNovaSenhaConfirmacao("Livr0sBr4sil!");
-//		
-//		String jsonRequest = objectMapper.writeValueAsString(senhaAlterada);
-//		Long expiracao = 1699708883124L;
-//		
-//		UsuarioEntity usuarioExpected = this.entity;
-//		usuarioExpected.setSenha(senhaAlterada.getNovaSenha());
-//		
-//		when(usuarioRepository.save(usuarioExpected)).thenReturn(usuarioExpected);
+	@Test
+	void deveAlterarSenhaApartirDaExpiracaoComSucesso() throws Exception {
+		
+		String login = this.cpfCnpj;
+		String novaSenha = "s3nh@Forte2!";
+		
+		CredenciamentoResponse response = this.usuarioService.solicitarNovaSenha(login);
+		
+		SenhaAlteracaoRequest request = new SenhaAlteracaoRequest();
+		request.setUsuario(response.getUsuario());
+		request.setSenhaAtual(response.getToken());
+		request.setNovaSenha(novaSenha);
+		request.setNovaSenhaConfirmacao(novaSenha);
+		
+		Long expiracao = response.getExpiracao();
+		
+		SessaoResponse senhaAlterada = usuarioService.alterarSenha(expiracao, request);
+		UsuarioEntity entity = usuarioRepository.findByLogin(response.getLogin());
+		
+//		String jsonRequest = objectMapper.writeValueAsString(request);
 //		
 //		mockMvc.perform(patch("/public/alteracao-senha/{expiracao}", expiracao)
 //				.contentType(MediaType.APPLICATION_JSON)
 //				.content(jsonRequest))
 //				.andExpect(status().isOk())
 //				.andReturn();
-//		
-//		UsuarioEntity usuario = this.usuarioRepository.save(usuarioExpected);
-//		
-//		assertEquals(senhaAlterada.getNovaSenha(), usuario.getSenha());
-//	}
+		
+		boolean passwordOk = encoder.matches(novaSenha, entity.getSenha());
+		
+		assertTrue(passwordOk);
+		assertNotEquals(null, entity.getSenha());
+		assertNotEquals(null, senhaAlterada.getToken());
+		assertEquals(login, senhaAlterada.getUsuario().getLogin());
+		
+	}
 	
 //	@Test
 //	void deveRealizarLoginComSucesso() throws Exception {
@@ -203,9 +214,9 @@ class PublicoResourceTest {
 		
 		//when(this.usuarioService.solicitarNovaSenha(login)).thenReturn(responseExpected);
 		
-//		mockMvc.perform(patch("/public/solicitacao-nova-senha/id/{id}", id))
-//		.andExpect(status().isOk())
-//		.andReturn();
+		mockMvc.perform(patch("/public/solicitacao-nova-senha/id/{id}", id))
+		.andExpect(status().isOk())
+		.andReturn();
 		
 		CredenciamentoResponse response = this.usuarioService.solicitarNovaSenha(login);
 		
@@ -230,9 +241,9 @@ class PublicoResourceTest {
 		
 		//when(this.usuarioService.solicitarNovaSenha(login)).thenReturn(response);
 		
-//		mockMvc.perform(patch("/public/solicitacao-nova-senha/login/{login}", login))
-//				.andExpect(status().isOk())
-//				.andReturn();
+		mockMvc.perform(patch("/public/solicitacao-nova-senha/login/{login}", login))
+				.andExpect(status().isOk())
+				.andReturn();
 		
 		CredenciamentoResponse response = this.usuarioService.solicitarNovaSenha(login);
 		
