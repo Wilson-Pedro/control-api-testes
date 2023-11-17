@@ -44,6 +44,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 class PublicoResourceTest {
 	
 	String cpfCnpj = "52340615000160";
+	String novaSenha = "s3nh@Forte2!";
 	
 	@InjectMocks
 	PublicoResource publicoResource;
@@ -55,12 +56,13 @@ class PublicoResourceTest {
 	UsuarioRepository usuarioRepository;
 	
 	@Autowired
-    private PasswordEncoder encoder;
+    PasswordEncoder encoder;
 
 	@Autowired
 	PrimeiroAcessoService primeiroAcessoService;
 	
-	LoginService loginService = mock(LoginService.class);
+	@Autowired
+	LoginService loginService;
 	
 	EmpresaService empresaService = mock(EmpresaService.class);
 	
@@ -79,7 +81,6 @@ class PublicoResourceTest {
 		request.setEmail("maria.tereza@hotmail.com.br");
 		
 	}
-
 	
 	@Test
 	void deveRealizarPrimeiroAcessoDaEmpresaComSucesso() throws Exception {
@@ -116,7 +117,6 @@ class PublicoResourceTest {
 	void deveAlterarSenhaApartirDaExpiracaoComSucesso() throws Exception {
 		
 		String login = this.cpfCnpj;
-		String novaSenha = "s3nh@Forte2!";
 		
 		CredenciamentoResponse response = this.usuarioService.solicitarNovaSenha(login);
 		
@@ -131,6 +131,8 @@ class PublicoResourceTest {
 		SessaoResponse senhaAlterada = usuarioService.alterarSenha(expiracao, request);
 		UsuarioEntity entity = usuarioRepository.findByLogin(response.getLogin());
 		
+		boolean passwordOk = encoder.matches(novaSenha, entity.getSenha());
+		
 //		String jsonRequest = objectMapper.writeValueAsString(request);
 //		
 //		mockMvc.perform(patch("/public/alteracao-senha/{expiracao}", expiracao)
@@ -139,8 +141,6 @@ class PublicoResourceTest {
 //				.andExpect(status().isOk())
 //				.andReturn();
 		
-		boolean passwordOk = encoder.matches(novaSenha, entity.getSenha());
-		
 		assertTrue(passwordOk);
 		assertNotEquals(null, entity.getSenha());
 		assertNotEquals(null, senhaAlterada.getToken());
@@ -148,44 +148,40 @@ class PublicoResourceTest {
 		
 	}
 	
-//	@Test
-//	void deveRealizarLoginComSucesso() throws Exception {
-//		
-//		UsuarioResponse usuarioResponse = new UsuarioResponse();
-//		usuarioResponse.setId(2);
-//		usuarioResponse.setLogin("69059312000177");
-//		usuarioResponse.setNome("CALCADOS SA");
-//		usuarioResponse.setSobrenome("CALCADOS SOUSA ANDRADE");
-//		usuarioResponse.setEmail("sousa.andrade@hotmail.com.br");
-//		usuarioResponse.setBloqueado(false);
-//		usuarioResponse.setExpirado(false);
-//		usuarioResponse.setPerfil(null);
-//		
-//		SessaoResponse sessionExpected = new SessaoResponse();
-//		sessionExpected.setInicioSessao(LocalDateTime.now());
-//		sessionExpected.setFimSessao(sessionExpected.getInicioSessao().plusHours(4));
-//		sessionExpected.setUsuario(usuarioResponse);
-//		sessionExpected.setToken("eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI2OTA1OTMxMjAwMDE3NyIsImlhdCI6MTY5OTQ2MzU4NiwiZXhwIjoxNjk5NDc3OTg2LCJhdXRob3JpdGllcyI6WyJST0xFX0FETUlOIl0sInVzdWFyaW8iOjIsImVtcHJlc2EiOjIsIm9yZ2FuaXphY2FvIjoyLCJ2YWxpZG8iOnRydWV9.RRQV_1W02z7otXWISq5nDeWEEsrApzZTiqpkCPgJhcXXX-wwJ1kJopdciFptq4mQRwYfnjDfdo-HWEH7El4E0A");
-//		
-//		LoginRequest login = new LoginRequest();
-//		login.setUsuario("69059312000177");
-//		login.setSenha("p4ss0rdF0rt3!");
-//		
-//		when(this.loginService.autenticar(login)).thenReturn(sessionExpected);
-//		
-//		String jsonRequest = objectMapper.writeValueAsString(login);
-//		
-//		mockMvc.perform(post("/public/login")
-//				.contentType(MediaType.APPLICATION_JSON)
-//				.content(jsonRequest))
-//				.andExpect(status().isOk())
-//				.andReturn();
-//		
-//		final var session = loginService.autenticar(login);
-//		
-//		assertThat(session).usingRecursiveComparison().isEqualTo(sessionExpected);
-//		verify(loginService, times(1)).autenticar(login);
-//	}
+	@Test
+	void deveRealizarLoginComSucesso() throws Exception {
+		
+		String login = this.cpfCnpj;
+		CredenciamentoResponse response = this.usuarioService.solicitarNovaSenha(login);
+		
+		SenhaAlteracaoRequest request = new SenhaAlteracaoRequest();
+		request.setUsuario(response.getUsuario());
+		request.setSenhaAtual(response.getToken());
+		request.setNovaSenha(novaSenha);
+		request.setNovaSenhaConfirmacao(novaSenha);
+		
+		Long expiracao = response.getExpiracao();
+		
+		SessaoResponse senhaAlterada = usuarioService.alterarSenha(expiracao, request);
+
+		LoginRequest loginRequest = new LoginRequest();
+		loginRequest.setUsuario(response.getLogin());
+		loginRequest.setSenha(novaSenha);
+		
+		SessaoResponse sessaoResponse = loginService.autenticar(loginRequest);
+		
+		String jsonRequest = objectMapper.writeValueAsString(loginRequest);
+		
+		mockMvc.perform(post("/public/login")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(jsonRequest))
+				.andExpect(status().isOk())
+				.andReturn();
+		
+		assertNotEquals(null, senhaAlterada.getToken());
+		assertTrue(response.getUsuario() > 0);
+	}
+	
 	
 //	@Test
 //	void deveSelecionarEmpresaComSucesso() throws Exception {
@@ -218,7 +214,7 @@ class PublicoResourceTest {
 		.andExpect(status().isOk())
 		.andReturn();
 		
-		CredenciamentoResponse response = this.usuarioService.solicitarNovaSenha(login);
+		CredenciamentoResponse response = this.usuarioService.solicitarNovaSenha(id);
 		
 		assertNotEquals(null, response.getExpiracao());
 		assertNotEquals(null, response.getUsuario());
