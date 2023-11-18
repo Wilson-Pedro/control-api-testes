@@ -43,6 +43,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @AutoConfigureMockMvc
 class PublicoResourceTest {
 	
+	static String TOKEN;
 	String cpfCnpj = "52340615000160";
 	String novaSenha = "s3nh@Forte2!";
 	
@@ -64,7 +65,8 @@ class PublicoResourceTest {
 	@Autowired
 	LoginService loginService;
 	
-	EmpresaService empresaService = mock(EmpresaService.class);
+	@Autowired
+	EmpresaService empresaService;
 	
 	@Autowired
 	private ObjectMapper objectMapper;
@@ -169,6 +171,7 @@ class PublicoResourceTest {
 		loginRequest.setSenha(novaSenha);
 		
 		SessaoResponse sessaoResponse = loginService.autenticar(loginRequest);
+		this.TOKEN = sessaoResponse.getToken();
 		
 		String jsonRequest = objectMapper.writeValueAsString(loginRequest);
 		
@@ -179,28 +182,25 @@ class PublicoResourceTest {
 				.andReturn();
 		
 		assertNotEquals(null, senhaAlterada.getToken());
+		assertNotEquals(null, TOKEN);
 		assertTrue(response.getUsuario() > 0);
 	}
 	
 	
-//	@Test
-//	void deveSelecionarEmpresaComSucesso() throws Exception {
-//		
-//		Integer empresa = 2;
-//		String tokenExpected = "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI2OTA1OTMxMjAwMDE3NyIsImlhdCI6MTY5OTcwNDg2NCwiZXhwIjoxNjk5NzE5MjY0LCJhdXRob3JpdGllcyI6WyJST0xFX0FETUlOIl0sInVzdWFyaW8iOjIsImVtcHJlc2EiOjIsIm9yZ2FuaXphY2FvIjoyLCJ2YWxpZG8iOnRydWV9.uZ9XSGTcvCeefoQAiewEU-XBaI2Pva8IFRq5pztcL66iNLwziGJLOFAzRwF2OSegr9seEJF-zDXPCcp9-LxC4A";
-//		
-//		when(this.empresaService.selecionarEmpresa(empresa, tokenExpected)).thenReturn(tokenExpected);
-//		
-//		mockMvc.perform(get("/public/empresas/selecao/{empresa}", empresa)
-//				.header("authorization", "Bearer " + tokenExpected))
-//				.andExpect(status().isOk())
-//				.andReturn();
-//		
-//		String token = this.empresaService.selecionarEmpresa(empresa, tokenExpected);
-//		
-//		assertEquals(token, tokenExpected);
-//		verify(empresaService, times(1)).selecionarEmpresa(empresa, token);
-//	}
+	@Test
+	void deveSelecionarEmpresaComSucesso() throws Exception {
+		
+		Integer empresa = 135;
+		
+		String newTOken = this.empresaService.selecionarEmpresa(empresa, this.TOKEN);
+		
+		mockMvc.perform(get("/public/empresas/selecao/{empresa}", empresa)
+				.header("authorization", "Bearer " + this.TOKEN))
+				.andExpect(status().isOk())
+				.andReturn();
+		
+		assertNotEquals(null, newTOken);
+	}
 
 	@Test
 	void deveSolicitarNovaSenhaApartirDoIdComSucesso() throws Exception {
@@ -211,8 +211,8 @@ class PublicoResourceTest {
 		//when(this.usuarioService.solicitarNovaSenha(login)).thenReturn(responseExpected);
 		
 		mockMvc.perform(patch("/public/solicitacao-nova-senha/id/{id}", id))
-		.andExpect(status().isOk())
-		.andReturn();
+				.andExpect(status().isOk())
+				.andReturn();
 		
 		CredenciamentoResponse response = this.usuarioService.solicitarNovaSenha(id);
 		
