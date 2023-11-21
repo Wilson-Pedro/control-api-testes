@@ -15,8 +15,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.time.LocalDateTime;
 
+import org.junit.FixMethodOrder;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.runners.MethodSorters;
 import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -41,6 +47,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class PublicoResourceTest {
 	
 	static String TOKEN;
@@ -85,6 +92,7 @@ class PublicoResourceTest {
 	}
 	
 	@Test
+	@Order(1)
 	void deveRealizarPrimeiroAcessoDaEmpresaComSucesso() throws Exception {
 		
 		String cpfCnpj = "36605972000157";
@@ -116,6 +124,7 @@ class PublicoResourceTest {
 	}
 	
 	@Test
+	@Order(2)
 	void deveAlterarSenhaApartirDaExpiracaoComSucesso() throws Exception {
 		
 		String login = this.cpfCnpj;
@@ -151,6 +160,7 @@ class PublicoResourceTest {
 	}
 	
 	@Test
+	@Order(3)
 	void deveRealizarLoginComSucesso() throws Exception {
 		
 		String login = this.cpfCnpj;
@@ -188,6 +198,7 @@ class PublicoResourceTest {
 	
 	
 	@Test
+	@Order(4)
 	void deveSelecionarEmpresaComSucesso() throws Exception {
 		
 		Integer empresa = 135;
@@ -203,6 +214,7 @@ class PublicoResourceTest {
 	}
 
 	@Test
+	@Order(5)
 	void deveSolicitarNovaSenhaApartirDoIdComSucesso() throws Exception {
 		
 		Integer id = 134;
@@ -231,6 +243,7 @@ class PublicoResourceTest {
 	}
 
 	@Test
+	@Order(6)
 	void deveSolicitarNovaSenhaApartirDoLoginComSucesso() throws Exception {
 		
 		String login = this.cpfCnpj;
