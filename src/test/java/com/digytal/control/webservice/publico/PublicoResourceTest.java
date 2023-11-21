@@ -30,6 +30,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import com.digytal.control.infra.model.CredenciamentoResponse;
 import com.digytal.control.infra.model.LoginRequest;
@@ -53,6 +54,7 @@ class PublicoResourceTest {
 	static String TOKEN;
 	String cpfCnpj = "52340615000160";
 	String novaSenha = "s3nh@Forte2!";
+	String login = this.cpfCnpj;
 	
 	@InjectMocks
 	PublicoResource publicoResource;
@@ -102,15 +104,6 @@ class PublicoResourceTest {
 		request.setSobrenomeSocial("RADIOS BRUNO RIBEIRO");
 		request.setEmail("ribeiro.bruno@hotmail.com.br");
 		
-//		String jsonRequest = objectMapper.writeValueAsString(request);
-//		
-//		mockMvc.perform(post("/public/empresa/primeiro-acesso/{cpfCnpj}", cpfCnpj)
-//				.contentType(MediaType.APPLICATION_JSON)
-//				.content(jsonRequest)
-//				.param("cpfCnpj", cpfCnpj))
-//				.andExpect(status().isOk())
-//				.andReturn();
-		
 		CredenciamentoResponse response = this.primeiroAcessoService.configurarPrimeiroAcesso(cpfCnpj, request);
 		
 		assertNotEquals(null, response.getExpiracao());
@@ -125,9 +118,26 @@ class PublicoResourceTest {
 	
 	@Test
 	@Order(2)
-	void deveAlterarSenhaApartirDaExpiracaoComSucesso() throws Exception {
+	void deveRealizarPrimeiroAcessoDaEmpresaAPartirDaRequesicaoComSucesso() throws Exception {
+		String cpfCnpj = "06684753000140";
 		
-		String login = this.cpfCnpj;
+		CadastroSimplificadoRequest request = new CadastroSimplificadoRequest();
+		request.setNomeFantasia("PERFUMES BR");
+		request.setSobrenomeSocial("PERFUMES BRASIL");
+		request.setEmail("brasil.perfumes@hotmail.com.br");
+		
+		String jsonRequest = objectMapper.writeValueAsString(request);
+		
+		mockMvc.perform(post("/public/empresa/primeiro-acesso/{cpfCnpj}", cpfCnpj)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(jsonRequest)
+				.param("cpfCnpj", cpfCnpj))
+				.andExpect(status().isOk());
+	}
+	
+	@Test
+	@Order(3)
+	void deveAlterarSenhaApartirDaExpiracaoComSucesso() throws Exception {
 		
 		CredenciamentoResponse response = this.usuarioService.solicitarNovaSenha(login);
 		
@@ -144,14 +154,6 @@ class PublicoResourceTest {
 		
 		boolean passwordOk = encoder.matches(novaSenha, entity.getSenha());
 		
-//		String jsonRequest = objectMapper.writeValueAsString(request);
-//		
-//		mockMvc.perform(patch("/public/alteracao-senha/{expiracao}", expiracao)
-//				.contentType(MediaType.APPLICATION_JSON)
-//				.content(jsonRequest))
-//				.andExpect(status().isOk())
-//				.andReturn();
-		
 		assertTrue(passwordOk);
 		assertNotEquals(null, entity.getSenha());
 		assertNotEquals(null, senhaAlterada.getToken());
@@ -160,7 +162,30 @@ class PublicoResourceTest {
 	}
 	
 	@Test
-	@Order(3)
+	@Order(4)
+	void deveAlterarSenhaApartirDaExpiracaoAPartirDaRequesicaoComSucesso() throws Exception {
+		
+		CredenciamentoResponse response = this.usuarioService.solicitarNovaSenha(login);
+		
+		Long expiracao = response.getExpiracao();
+		
+		SenhaAlteracaoRequest request = new SenhaAlteracaoRequest();
+		request.setUsuario(response.getUsuario());
+		request.setSenhaAtual(response.getToken());
+		request.setNovaSenha(novaSenha);
+		request.setNovaSenhaConfirmacao(novaSenha);
+		
+		String jsonRequest = objectMapper.writeValueAsString(request);
+		
+		mockMvc.perform(patch("/public/alteracao-senha/{expiracao}", expiracao)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(jsonRequest))
+				.andExpect(status().isOk())
+				.andReturn();
+	}
+	
+	@Test
+	@Order(5)
 	void deveRealizarLoginComSucesso() throws Exception {
 		
 		String login = this.cpfCnpj;
@@ -198,7 +223,7 @@ class PublicoResourceTest {
 	
 	
 	@Test
-	@Order(4)
+	@Order(6)
 	void deveSelecionarEmpresaComSucesso() throws Exception {
 		
 		Integer empresa = 135;
@@ -214,7 +239,7 @@ class PublicoResourceTest {
 	}
 
 	@Test
-	@Order(5)
+	@Order(7)
 	void deveSolicitarNovaSenhaApartirDoIdComSucesso() throws Exception {
 		
 		Integer id = 134;
@@ -243,7 +268,7 @@ class PublicoResourceTest {
 	}
 
 	@Test
-	@Order(6)
+	@Order(8)
 	void deveSolicitarNovaSenhaApartirDoLoginComSucesso() throws Exception {
 		
 		String login = this.cpfCnpj;
