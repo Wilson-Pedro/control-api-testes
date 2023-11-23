@@ -1,11 +1,11 @@
 package com.digytal.control.webservice.publico;
 
 import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -19,14 +19,12 @@ import com.digytal.control.infra.model.CredenciamentoResponse;
 import com.digytal.control.model.comum.cadastramento.CadastroSimplificadoRequest;
 import com.digytal.control.service.modulo.acesso.PrimeiroAcessoService;
 import com.digytal.control.service.modulo.acesso.UsuarioService;
+import static com.digytal.control.webservice.LoginUniversal.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class PublicTest {
-	
-	String cpfCnpj = "66845905000170";
-	String login = this.cpfCnpj;
 	
 	@Autowired
 	PrimeiroAcessoService primeiroAcessoService;
@@ -48,7 +46,7 @@ class PublicTest {
 		request.setSobrenomeSocial("CALÇADOS BRAZIL");
 		request.setEmail("brazil.calcados@hotmail.com.br");
 		
-		CredenciamentoResponse response = this.primeiroAcessoService.configurarPrimeiroAcesso(cpfCnpj, request);
+		CredenciamentoResponse response = this.primeiroAcessoService.configurarPrimeiroAcesso(CPF_CNPJ, request);
 		
 		assertNotEquals(null, response.getExpiracao());
 		assertNotEquals(null, response.getUsuario());
@@ -64,13 +62,11 @@ class PublicTest {
 	@Order(2)
 	void deveSolicitarNovaSenhaApartirDoLoginComSucesso() throws Exception {
 		
-		String login = this.cpfCnpj;
-		
-		mockMvc.perform(patch("/public/solicitacao-nova-senha/login/{login}", login))
+		mockMvc.perform(patch("/public/solicitacao-nova-senha/login/{login}", LOGIN))
 				.andExpect(status().isOk())
 				.andReturn();
 		
-		RESPONSE = this.usuarioService.solicitarNovaSenha(login);
+		RESPONSE = this.usuarioService.solicitarNovaSenha(LOGIN);
 		
 		assertNotEquals(null, RESPONSE.getExpiracao());
 		assertNotEquals(null, RESPONSE.getUsuario());
@@ -79,14 +75,13 @@ class PublicTest {
 		assertNotEquals(null, RESPONSE.getToken());
 		assertTrue(RESPONSE.getExpiracao() > 0);
 		assertTrue(RESPONSE.getUsuario() > 0);
-		assertEquals(login, RESPONSE.getLogin());
+		assertEquals(LOGIN, RESPONSE.getLogin());
 	}
 	
 	@Test
 	@Order(3)
 	void deveSolicitarNovaSenhaApartirDoIdComSucesso() throws Exception {
 		
-		String login = cpfCnpj;
 		Integer id = RESPONSE.getUsuario();
 		
 		mockMvc.perform(patch("/public/solicitacao-nova-senha/id/{id}", id))
@@ -103,7 +98,7 @@ class PublicTest {
 		assertTrue(response.getExpiracao() > 0);
 		assertTrue(response.getUsuario() > 0);
 		assertEquals(id, response.getUsuario());
-		assertEquals(login, response.getLogin());
+		assertEquals(LOGIN, response.getLogin());
 		
 	}
 

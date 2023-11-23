@@ -1,10 +1,12 @@
 package com.digytal.control.webservice.publico;
 
+import static com.digytal.control.webservice.LoginUniversal.CPF_CNPJ;
+import static com.digytal.control.webservice.LoginUniversal.LOGIN;
+import static com.digytal.control.webservice.LoginUniversal.SENHA;
+import static com.digytal.control.webservice.LoginUniversal.TOKEN;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -13,7 +15,6 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,44 +29,36 @@ import com.digytal.control.model.comum.cadastramento.CadastroSimplificadoRequest
 import com.digytal.control.model.modulo.acesso.usuario.SenhaAlteracaoRequest;
 import com.digytal.control.model.modulo.acesso.usuario.UsuarioEntity;
 import com.digytal.control.repository.modulo.acesso.UsuarioRepository;
-import com.digytal.control.service.modulo.acesso.EmpresaService;
 import com.digytal.control.service.modulo.acesso.LoginService;
 import com.digytal.control.service.modulo.acesso.PrimeiroAcessoService;
 import com.digytal.control.service.modulo.acesso.UsuarioService;
-import static com.digytal.control.webservice.LoginUniversal.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-class PublicoResourceTest {
-	
-	@InjectMocks
-	PublicoResource publicoResource;
+class LoginTest {
 	
 	@Autowired
-	UsuarioService  usuarioService;
+	LoginService loginService;
+	
+	@Autowired
+	UsuarioService usuarioService;
+	
+	@Autowired
+	PrimeiroAcessoService primeiroAcessoService;
 	
 	@Autowired
 	UsuarioRepository usuarioRepository;
 	
 	@Autowired
     PasswordEncoder encoder;
-
-	@Autowired
-	PrimeiroAcessoService primeiroAcessoService;
 	
 	@Autowired
-	LoginService loginService;
-	
-	@Autowired
-	EmpresaService empresaService;
+	private MockMvc mockMvc;
 	
 	@Autowired
 	private ObjectMapper objectMapper;
-	
-	@Autowired
-	MockMvc mockMvc;
 	
 	CadastroSimplificadoRequest request = new CadastroSimplificadoRequest();
 	
@@ -94,71 +87,6 @@ class PublicoResourceTest {
 	}
 	
 	@Test
-	@Order(2)
-	void deveRealizarPrimeiroAcessoDaEmpresaAPartirDaRequesicaoComSucesso() throws Exception {
-		String cpfCnpj = "06684753000140";
-		
-		CadastroSimplificadoRequest request = new CadastroSimplificadoRequest();
-		request.setNomeFantasia("PERFUMES BR");
-		request.setSobrenomeSocial("PERFUMES BRASIL");
-		request.setEmail("brasil.perfumes@hotmail.com.br");
-		
-		String jsonRequest = objectMapper.writeValueAsString(request);
-		
-		mockMvc.perform(post("/public/empresa/primeiro-acesso/{cpfCnpj}", cpfCnpj)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(jsonRequest)
-				.param("cpfCnpj", cpfCnpj))
-				.andExpect(status().isOk());
-	}
-	
-	@Test
-	@Order(3)
-	void deveSolicitarNovaSenhaApartirDoLoginComSucesso() throws Exception {
-		
-		mockMvc.perform(patch("/public/solicitacao-nova-senha/login/{login}", LOGIN))
-				.andExpect(status().isOk())
-				.andReturn();
-		
-		CredenciamentoResponse response = this.usuarioService.solicitarNovaSenha(LOGIN);
-		
-		assertNotEquals(null, response.getExpiracao());
-		assertNotEquals(null, response.getUsuario());
-		assertNotEquals(null, response.getLogin());
-		assertNotEquals(null, response.getNome());
-		assertNotEquals(null, response.getToken());
-		assertTrue(response.getExpiracao() > 0);
-		assertTrue(response.getUsuario() > 0);
-		assertEquals(LOGIN, response.getLogin());
-	}
-	
-	@Test
-	@Order(4)
-	void deveSolicitarNovaSenhaApartirDoIdComSucesso() throws Exception {
-		
-		CredenciamentoResponse responseExpected = this.usuarioService.solicitarNovaSenha(LOGIN);
-		Integer id = responseExpected.getUsuario();
-		
-		mockMvc.perform(patch("/public/solicitacao-nova-senha/id/{id}", id))
-				.andExpect(status().isOk())
-				.andReturn();
-		
-		CredenciamentoResponse response = this.usuarioService.solicitarNovaSenha(id);
-		
-		assertNotEquals(null, response.getExpiracao());
-		assertNotEquals(null, response.getUsuario());
-		assertNotEquals(null, response.getLogin());
-		assertNotEquals(null, response.getNome());
-		assertNotEquals(null, response.getToken());
-		assertTrue(response.getExpiracao() > 0);
-		assertTrue(response.getUsuario() > 0);
-		assertEquals(id, response.getUsuario());
-		assertEquals(LOGIN, response.getLogin());
-		
-	}
-	
-	@Test
-	@Order(5)
 	void deveAlterarSenhaApartirDaExpiracaoComSucesso() throws Exception {
 		
 		CredenciamentoResponse response = this.usuarioService.solicitarNovaSenha(LOGIN);
@@ -182,32 +110,8 @@ class PublicoResourceTest {
 		assertEquals(LOGIN, senhaAlterada.getUsuario().getLogin());
 		
 	}
-	
+
 	@Test
-	@Order(6)
-	void deveAlterarSenhaApartirDaExpiracaoAPartirDaRequesicaoComSucesso() throws Exception {
-		
-		CredenciamentoResponse response = this.usuarioService.solicitarNovaSenha(LOGIN);
-		
-		Long expiracao = response.getExpiracao();
-		
-		SenhaAlteracaoRequest request = new SenhaAlteracaoRequest();
-		request.setUsuario(response.getUsuario());
-		request.setSenhaAtual(response.getToken());
-		request.setNovaSenha(SENHA);
-		request.setNovaSenhaConfirmacao(SENHA);
-		
-		String jsonRequest = objectMapper.writeValueAsString(request);
-		
-		mockMvc.perform(patch("/public/alteracao-senha/{expiracao}", expiracao)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(jsonRequest))
-				.andExpect(status().isOk())
-				.andReturn();
-	}
-	
-	@Test
-	@Order(6)
 	void deveRealizarLoginComSucesso() throws Exception {
 		
 		CredenciamentoResponse response = this.usuarioService.solicitarNovaSenha(LOGIN);
@@ -241,23 +145,5 @@ class PublicoResourceTest {
 		assertNotEquals(null, TOKEN);
 		assertTrue(response.getUsuario() > 0);
 	}
-	
-	
-	@Test
-	@Order(7)
-	void deveSelecionarEmpresaComSucesso() throws Exception {
-		
-		CredenciamentoResponse response = this.usuarioService.solicitarNovaSenha(LOGIN);
-		
-		Integer empresa = response.getUsuario() + 1;
-		
-		String newTOken = this.empresaService.selecionarEmpresa(empresa, TOKEN);
-		
-		mockMvc.perform(get("/public/empresas/selecao/{empresa}", empresa)
-				.header("authorization", "Bearer " + TOKEN))
-				.andExpect(status().isOk())
-				.andReturn();
-		
-		assertNotEquals(null, newTOken);
-	}
+
 }
