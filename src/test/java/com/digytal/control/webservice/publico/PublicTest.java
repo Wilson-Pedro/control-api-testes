@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -25,6 +26,7 @@ import com.digytal.control.service.modulo.acesso.UsuarioService;
 class PublicTest {
 	
 	String cpfCnpj = "66845905000170";
+	String login = this.cpfCnpj;
 	
 	@Autowired
 	PrimeiroAcessoService primeiroAcessoService;
@@ -34,7 +36,9 @@ class PublicTest {
 	
 	@Autowired
 	private MockMvc mockMvc;
-
+	
+	static CredenciamentoResponse RESPONSE = new CredenciamentoResponse();
+	
 	@Test
 	@Order(1)
 	void deveRealizarPrimeiroAcessoDaEmpresaComSucesso() throws Exception {
@@ -66,16 +70,16 @@ class PublicTest {
 				.andExpect(status().isOk())
 				.andReturn();
 		
-		CredenciamentoResponse response = this.usuarioService.solicitarNovaSenha(login);
+		RESPONSE = this.usuarioService.solicitarNovaSenha(login);
 		
-		assertNotEquals(null, response.getExpiracao());
-		assertNotEquals(null, response.getUsuario());
-		assertNotEquals(null, response.getLogin());
-		assertNotEquals(null, response.getNome());
-		assertNotEquals(null, response.getToken());
-		assertTrue(response.getExpiracao() > 0);
-		assertTrue(response.getUsuario() > 0);
-		assertEquals(login, response.getLogin());
+		assertNotEquals(null, RESPONSE.getExpiracao());
+		assertNotEquals(null, RESPONSE.getUsuario());
+		assertNotEquals(null, RESPONSE.getLogin());
+		assertNotEquals(null, RESPONSE.getNome());
+		assertNotEquals(null, RESPONSE.getToken());
+		assertTrue(RESPONSE.getExpiracao() > 0);
+		assertTrue(RESPONSE.getUsuario() > 0);
+		assertEquals(login, RESPONSE.getLogin());
 	}
 	
 	@Test
@@ -83,8 +87,7 @@ class PublicTest {
 	void deveSolicitarNovaSenhaApartirDoIdComSucesso() throws Exception {
 		
 		String login = cpfCnpj;
-		CredenciamentoResponse responseExpected = this.usuarioService.solicitarNovaSenha(login);
-		Integer id = responseExpected.getUsuario();
+		Integer id = RESPONSE.getUsuario();
 		
 		mockMvc.perform(patch("/public/solicitacao-nova-senha/id/{id}", id))
 				.andExpect(status().isOk())
