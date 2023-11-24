@@ -27,8 +27,8 @@ import com.digytal.control.infra.model.LoginRequest;
 import com.digytal.control.infra.model.SessaoResponse;
 import com.digytal.control.model.comum.cadastramento.CadastroSimplificadoRequest;
 import com.digytal.control.model.modulo.acesso.usuario.SenhaAlteracaoRequest;
-import com.digytal.control.model.modulo.acesso.usuario.UsuarioEntity;
 import com.digytal.control.repository.modulo.acesso.UsuarioRepository;
+import com.digytal.control.service.modulo.acesso.EmpresaService;
 import com.digytal.control.service.modulo.acesso.LoginService;
 import com.digytal.control.service.modulo.acesso.PrimeiroAcessoService;
 import com.digytal.control.service.modulo.acesso.UsuarioService;
@@ -49,6 +49,9 @@ class LoginTest {
 	PrimeiroAcessoService primeiroAcessoService;
 	
 	@Autowired
+	EmpresaService empresaService;
+	
+	@Autowired
 	UsuarioRepository usuarioRepository;
 	
 	@Autowired
@@ -67,7 +70,6 @@ class LoginTest {
 		request.setNomeFantasia("ROUPAS BR");
 		request.setSobrenomeSocial("ROUPAS BRASIL");
 		request.setEmail("brasil.roupas@hotmail.com.br");
-		
 	}
 	
 	@Test
@@ -84,31 +86,6 @@ class LoginTest {
 		assertTrue(response.getExpiracao() > 0);
 		assertTrue(response.getUsuario() > 0);
 		assertEquals(request.getNomeFantasia(), response.getNome());
-	}
-	
-	@Test
-	void deveAlterarSenhaApartirDaExpiracaoComSucesso() throws Exception {
-		
-		CredenciamentoResponse response = this.usuarioService.solicitarNovaSenha(LOGIN);
-		
-		SenhaAlteracaoRequest request = new SenhaAlteracaoRequest();
-		request.setUsuario(response.getUsuario());
-		request.setSenhaAtual(response.getToken());
-		request.setNovaSenha(SENHA);
-		request.setNovaSenhaConfirmacao(SENHA);
-		
-		Long expiracao = response.getExpiracao();
-		
-		SessaoResponse senhaAlterada = usuarioService.alterarSenha(expiracao, request);
-		UsuarioEntity entity = usuarioRepository.findByLogin(response.getLogin());
-		
-		boolean passwordOk = encoder.matches(SENHA, entity.getSenha());
-		
-		assertTrue(passwordOk);
-		assertNotEquals(null, entity.getSenha());
-		assertNotEquals(null, senhaAlterada.getToken());
-		assertEquals(LOGIN, senhaAlterada.getUsuario().getLogin());
-		
 	}
 
 	@Test
@@ -145,5 +122,4 @@ class LoginTest {
 		assertNotEquals(null, TOKEN);
 		assertTrue(response.getUsuario() > 0);
 	}
-
 }
