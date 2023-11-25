@@ -79,6 +79,7 @@ public class PrimeiroAcessoService extends CadastroFactory {
         organizacaoRepository.save(organizacaoEntity);
         return organizacaoEntity;
     }
+    
     private void cadastrarAplicacoes(Integer organizacao){
         AplicacaoEntity aplicacao = new AplicacaoEntity();
         aplicacao.setNome("Receitas");
@@ -98,6 +99,7 @@ public class PrimeiroAcessoService extends CadastroFactory {
         aplicacao.setOrganizacao(organizacao);
         aplicacaoRepository.save(aplicacao);
     }
+    
     private void cadastrarContaFisica(boolean pessoaJuridica, Integer empresa){
         ContaEntity entity = new ContaEntity();
         entity.setSaldo(0.0);
@@ -115,6 +117,7 @@ public class PrimeiroAcessoService extends CadastroFactory {
         contaRepository.save(entity);
         cadastrarContaFisicaPagamento(entity.getId(), empresa);
     }
+    
     private void cadastrarContasDigitais( Integer empresa){
         ContaEntity entity = new ContaEntity();
         entity.setSaldo(0.0);
@@ -127,15 +130,18 @@ public class PrimeiroAcessoService extends CadastroFactory {
         contaRepository.save(entity);
         cadastrarContasDigitaisPagamento(entity.getId(), empresa);
     }
+    
     private void cadastrarContaFisicaPagamento(Integer conta, Integer empresa){
         formaPagamentoRepository.save(forma(MeioPagamento.DINHEIRO, conta, empresa));
     }
+    
     private void cadastrarContasDigitaisPagamento(Integer conta, Integer empresa){
         formaPagamentoRepository.save(forma(MeioPagamento.PIX, conta, empresa));
         formaPagamentoRepository.save(forma(MeioPagamento.DEBITO, conta, empresa));
         formaPagamentoRepository.save(forma(MeioPagamento.CREDITO, conta, empresa));
         formaPagamentoRepository.save(forma(MeioPagamento.PRAZO, conta, empresa));
     }
+    
     private FormaPagamentoEntity forma(MeioPagamento meioPagamento, Integer conta, Integer empresa){
         FormaPagamentoEntity entity = new FormaPagamentoEntity();
         entity.setMeioPagamento(meioPagamento);
