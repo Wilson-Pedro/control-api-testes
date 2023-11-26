@@ -76,18 +76,50 @@ class PublicoResourceTest {
 	@Autowired
 	MockMvc mockMvc;
 	
+	@Autowired
+	FormaPagamentoRepository formaPagamentoRepository;
+	
+	@Autowired
+	ContaRepository contaRepository;
+	
+	@Autowired
+	EmpresaRepository empresaRepository;
+	
+	@Autowired
+	AplicacaoRepository aplicacaoRepository;
+	
+	@Autowired
+	OrganizacaoRepository organizacaoRepository;
+	
 	CadastroSimplificadoRequest request = new CadastroSimplificadoRequest();
+	
+	CredenciamentoResponse configurarAcesso = new CredenciamentoResponse();
 	
 	@BeforeEach
 	void setup() {
+		usuarioRepository.deleteAll();
+		formaPagamentoRepository.deleteAll();
+		contaRepository.deleteAll();
+		empresaRepository.deleteAll();
+		aplicacaoRepository.deleteAll();
+		organizacaoRepository.deleteAll();
+		
 		request.setNomeFantasia("ROUPAS BR");
 		request.setSobrenomeSocial("ROUPAS BRASIL");
 		request.setEmail("brasil.roupas@hotmail.com.br");
+		
+		configurarAcesso = this.primeiroAcessoService.configurarPrimeiroAcesso(CPF_CNPJ, request);
 	}
 	
 	@Test
 	@Order(1)
 	void deveRealizarPrimeiroAcessoDaEmpresaComSucesso() throws Exception {
+		usuarioRepository.deleteAll();
+		formaPagamentoRepository.deleteAll();
+		contaRepository.deleteAll();
+		empresaRepository.deleteAll();
+		aplicacaoRepository.deleteAll();
+		organizacaoRepository.deleteAll();
 		
 		CredenciamentoResponse response = this.primeiroAcessoService.configurarPrimeiroAcesso(CPF_CNPJ, request);
 		
@@ -104,6 +136,7 @@ class PublicoResourceTest {
 	@Test
 	@Order(2)
 	void deveRealizarPrimeiroAcessoDaEmpresaAPartirDaRequesicaoComSucesso() throws Exception {
+		
 		String cpfCnpj = "06684753000140";
 		
 		CadastroSimplificadoRequest request = new CadastroSimplificadoRequest();
@@ -123,7 +156,6 @@ class PublicoResourceTest {
 	@Test
 	@Order(3)
 	void deveSolicitarNovaSenhaApartirDoLoginComSucesso() throws Exception {
-		//CredenciamentoResponse configurarAcesso = this.primeiroAcessoService.configurarPrimeiroAcesso(CPF_CNPJ, request);
 		
 		mockMvc.perform(patch("/public/solicitacao-nova-senha/login/{login}", LOGIN))
 				.andExpect(status().isOk())
@@ -255,6 +287,7 @@ class PublicoResourceTest {
 	@Test
 	@Order(8)
 	void deveSelecionarEmpresaComSucesso() throws Exception {
+		//CredenciamentoResponse configurarAcesso = this.primeiroAcessoService.configurarPrimeiroAcesso(CPF_CNPJ, request);
 		
 		CredenciamentoResponse response = this.usuarioService.solicitarNovaSenha(LOGIN);
 		

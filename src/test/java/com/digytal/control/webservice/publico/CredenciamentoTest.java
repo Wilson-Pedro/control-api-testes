@@ -27,7 +27,12 @@ import com.digytal.control.infra.model.SessaoResponse;
 import com.digytal.control.model.comum.cadastramento.CadastroSimplificadoRequest;
 import com.digytal.control.model.modulo.acesso.usuario.SenhaAlteracaoRequest;
 import com.digytal.control.model.modulo.acesso.usuario.UsuarioEntity;
+import com.digytal.control.repository.modulo.acesso.OrganizacaoRepository;
 import com.digytal.control.repository.modulo.acesso.UsuarioRepository;
+import com.digytal.control.repository.modulo.acesso.empresa.AplicacaoRepository;
+import com.digytal.control.repository.modulo.acesso.empresa.ContaRepository;
+import com.digytal.control.repository.modulo.acesso.empresa.EmpresaRepository;
+import com.digytal.control.repository.modulo.acesso.empresa.FormaPagamentoRepository;
 import com.digytal.control.service.modulo.acesso.EmpresaService;
 import com.digytal.control.service.modulo.acesso.LoginService;
 import com.digytal.control.service.modulo.acesso.PrimeiroAcessoService;
@@ -63,18 +68,50 @@ class CredenciamentoTest {
 	@Autowired
 	MockMvc mockMvc;
 	
+	@Autowired
+	FormaPagamentoRepository formaPagamentoRepository;
+	
+	@Autowired
+	ContaRepository contaRepository;
+	
+	@Autowired
+	EmpresaRepository empresaRepository;
+	
+	@Autowired
+	AplicacaoRepository aplicacaoRepository;
+	
+	@Autowired
+	OrganizacaoRepository organizacaoRepository;
+	
 	CadastroSimplificadoRequest request = new CadastroSimplificadoRequest();
+	
+	CredenciamentoResponse configurarAcesso = new CredenciamentoResponse();
 	
 	@BeforeEach
 	void setup() {
+		usuarioRepository.deleteAll();
+		formaPagamentoRepository.deleteAll();
+		contaRepository.deleteAll();
+		empresaRepository.deleteAll();
+		aplicacaoRepository.deleteAll();
+		organizacaoRepository.deleteAll();
+		
 		request.setNomeFantasia("ROUPAS BR");
 		request.setSobrenomeSocial("ROUPAS BRASIL");
 		request.setEmail("brasil.roupas@hotmail.com.br");
+		
+		configurarAcesso = this.primeiroAcessoService.configurarPrimeiroAcesso(CPF_CNPJ, request);
 	}
 	
 	@Test
 	@Order(1)
 	void deveRealizarPrimeiroAcessoDaEmpresaComSucesso() throws Exception {
+		usuarioRepository.deleteAll();
+		formaPagamentoRepository.deleteAll();
+		contaRepository.deleteAll();
+		empresaRepository.deleteAll();
+		aplicacaoRepository.deleteAll();
+		organizacaoRepository.deleteAll();
 		
 		CredenciamentoResponse response = this.primeiroAcessoService.configurarPrimeiroAcesso(CPF_CNPJ, request);
 		
@@ -110,7 +147,6 @@ class CredenciamentoTest {
 	@Test
 	@Order(3)
 	void deveSolicitarNovaSenhaApartirDoLoginComSucesso() throws Exception {
-		//CredenciamentoResponse configurarAcesso = this.primeiroAcessoService.configurarPrimeiroAcesso(CPF_CNPJ, request);
 		
 		mockMvc.perform(patch("/public/solicitacao-nova-senha/login/{login}", LOGIN))
 				.andExpect(status().isOk())

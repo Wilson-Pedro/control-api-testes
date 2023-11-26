@@ -27,7 +27,12 @@ import com.digytal.control.infra.model.LoginRequest;
 import com.digytal.control.infra.model.SessaoResponse;
 import com.digytal.control.model.comum.cadastramento.CadastroSimplificadoRequest;
 import com.digytal.control.model.modulo.acesso.usuario.SenhaAlteracaoRequest;
+import com.digytal.control.repository.modulo.acesso.OrganizacaoRepository;
 import com.digytal.control.repository.modulo.acesso.UsuarioRepository;
+import com.digytal.control.repository.modulo.acesso.empresa.AplicacaoRepository;
+import com.digytal.control.repository.modulo.acesso.empresa.ContaRepository;
+import com.digytal.control.repository.modulo.acesso.empresa.EmpresaRepository;
+import com.digytal.control.repository.modulo.acesso.empresa.FormaPagamentoRepository;
 import com.digytal.control.service.modulo.acesso.EmpresaService;
 import com.digytal.control.service.modulo.acesso.LoginService;
 import com.digytal.control.service.modulo.acesso.PrimeiroAcessoService;
@@ -63,31 +68,41 @@ class LoginTest {
 	@Autowired
 	private ObjectMapper objectMapper;
 	
+	@Autowired
+	FormaPagamentoRepository formaPagamentoRepository;
+	
+	@Autowired
+	ContaRepository contaRepository;
+	
+	@Autowired
+	EmpresaRepository empresaRepository;
+	
+	@Autowired
+	AplicacaoRepository aplicacaoRepository;
+	
+	@Autowired
+	OrganizacaoRepository organizacaoRepository;
+	
 	CadastroSimplificadoRequest request = new CadastroSimplificadoRequest();
+	
+	CredenciamentoResponse configurarAcesso = new CredenciamentoResponse();
 	
 	@BeforeEach
 	void setup() {
+		usuarioRepository.deleteAll();
+		formaPagamentoRepository.deleteAll();
+		contaRepository.deleteAll();
+		empresaRepository.deleteAll();
+		aplicacaoRepository.deleteAll();
+		organizacaoRepository.deleteAll();
+		
 		request.setNomeFantasia("ROUPAS BR");
 		request.setSobrenomeSocial("ROUPAS BRASIL");
 		request.setEmail("brasil.roupas@hotmail.com.br");
+		
+		configurarAcesso = this.primeiroAcessoService.configurarPrimeiroAcesso(CPF_CNPJ, request);
 	}
 	
-	@Test
-	@Order(1)
-	void deveRealizarPrimeiroAcessoDaEmpresaComSucesso() throws Exception {
-		
-		CredenciamentoResponse response = this.primeiroAcessoService.configurarPrimeiroAcesso(CPF_CNPJ, request);
-		
-		assertNotEquals(null, response.getExpiracao());
-		assertNotEquals(null, response.getUsuario());
-		assertNotEquals(null, response.getLogin());
-		assertNotEquals(null, response.getNome());
-		assertNotEquals(null, response.getToken());
-		assertTrue(response.getExpiracao() > 0);
-		assertTrue(response.getUsuario() > 0);
-		assertEquals(request.getNomeFantasia(), response.getNome());
-	}
-
 	@Test
 	void deveRealizarLoginComSucesso() throws Exception {
 		
