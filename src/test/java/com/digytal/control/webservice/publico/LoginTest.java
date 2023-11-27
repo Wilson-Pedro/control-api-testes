@@ -1,18 +1,15 @@
 package com.digytal.control.webservice.publico;
 
-import static com.digytal.control.webservice.LoginUniversal.CPF_CNPJ;
 import static com.digytal.control.webservice.LoginUniversal.LOGIN;
 import static com.digytal.control.webservice.LoginUniversal.SENHA;
 import static com.digytal.control.webservice.LoginUniversal.TOKEN;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,22 +82,11 @@ class LoginTest {
 	
 	CadastroSimplificadoRequest request = new CadastroSimplificadoRequest();
 	
-	CredenciamentoResponse configurarAcesso = new CredenciamentoResponse();
-	
 	@BeforeEach
 	void setup() {
-		usuarioRepository.deleteAll();
-		formaPagamentoRepository.deleteAll();
-		contaRepository.deleteAll();
-		empresaRepository.deleteAll();
-		aplicacaoRepository.deleteAll();
-		organizacaoRepository.deleteAll();
-		
 		request.setNomeFantasia("ROUPAS BR");
 		request.setSobrenomeSocial("ROUPAS BRASIL");
 		request.setEmail("brasil.roupas@hotmail.com.br");
-		
-		configurarAcesso = this.primeiroAcessoService.configurarPrimeiroAcesso(CPF_CNPJ, request);
 	}
 	
 	@Test
@@ -133,8 +119,8 @@ class LoginTest {
 				.andExpect(status().isOk())
 				.andReturn();
 		
-		assertNotEquals(null, senhaAlterada.getToken());
-		assertNotEquals(null, TOKEN);
+		assertNotNull(senhaAlterada.getToken());
+		assertNotNull(TOKEN);
 		assertTrue(response.getUsuario() > 0);
 	}
 }

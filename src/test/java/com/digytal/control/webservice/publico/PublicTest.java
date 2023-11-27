@@ -1,9 +1,10 @@
 package com.digytal.control.webservice.publico;
 
+import static com.digytal.control.webservice.LoginUniversal.CPF_CNPJ;
+import static com.digytal.control.webservice.LoginUniversal.LOGIN;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -27,7 +28,6 @@ import com.digytal.control.repository.modulo.acesso.empresa.EmpresaRepository;
 import com.digytal.control.repository.modulo.acesso.empresa.FormaPagamentoRepository;
 import com.digytal.control.service.modulo.acesso.PrimeiroAcessoService;
 import com.digytal.control.service.modulo.acesso.UsuarioService;
-import static com.digytal.control.webservice.LoginUniversal.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -63,33 +63,27 @@ class PublicTest {
 	
 	CadastroSimplificadoRequest request = new CadastroSimplificadoRequest();
 	
-	CredenciamentoResponse configurarAcesso = new CredenciamentoResponse();
-	
 	@BeforeEach
 	void setup() {
+		request.setNomeFantasia("ROUPAS BR");
+		request.setSobrenomeSocial("ROUPAS BRASIL");
+		request.setEmail("brasil.roupas@hotmail.com.br");
+	}
+	
+	@Test
+	@Order(1)
+	void deveDeletarTodosOsDadosDoBanco() {
 		usuarioRepository.deleteAll();
 		formaPagamentoRepository.deleteAll();
 		contaRepository.deleteAll();
 		empresaRepository.deleteAll();
 		aplicacaoRepository.deleteAll();
 		organizacaoRepository.deleteAll();
-		
-		request.setNomeFantasia("ROUPAS BR");
-		request.setSobrenomeSocial("ROUPAS BRASIL");
-		request.setEmail("brasil.roupas@hotmail.com.br");
-		
-		configurarAcesso = this.primeiroAcessoService.configurarPrimeiroAcesso(CPF_CNPJ, request);
 	}
 	
 	@Test
 	@Order(1)
 	void deveRealizarPrimeiroAcessoDaEmpresaComSucesso() throws Exception {
-		usuarioRepository.deleteAll();
-		formaPagamentoRepository.deleteAll();
-		contaRepository.deleteAll();
-		empresaRepository.deleteAll();
-		aplicacaoRepository.deleteAll();
-		organizacaoRepository.deleteAll();
 		
 		CredenciamentoResponse response = this.primeiroAcessoService.configurarPrimeiroAcesso(CPF_CNPJ, request);
 		
@@ -145,8 +139,6 @@ class PublicTest {
 		assertTrue(response.getExpiracao() > 0);
 		assertTrue(response.getUsuario() > 0);
 		assertEquals(id, response.getUsuario());
-		assertEquals(LOGIN, response.getLogin());
-		
+		assertEquals(LOGIN, response.getLogin());	
 	}
-
 }

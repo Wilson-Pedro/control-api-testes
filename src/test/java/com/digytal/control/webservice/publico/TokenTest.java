@@ -7,7 +7,6 @@ import static com.digytal.control.webservice.LoginUniversal.TOKEN;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -87,33 +86,27 @@ class TokenTest {
 	
 	CadastroSimplificadoRequest request = new CadastroSimplificadoRequest();
 	
-	CredenciamentoResponse configurarAcesso = new CredenciamentoResponse();
-	
 	@BeforeEach
 	void setup() {
-		usuarioRepository.deleteAll();
-		formaPagamentoRepository.deleteAll();
-		contaRepository.deleteAll();
-		empresaRepository.deleteAll();
-		aplicacaoRepository.deleteAll();
-		organizacaoRepository.deleteAll();
-		
 		request.setNomeFantasia("ROUPAS BR");
 		request.setSobrenomeSocial("ROUPAS BRASIL");
 		request.setEmail("brasil.roupas@hotmail.com.br");
-		
-		configurarAcesso = this.primeiroAcessoService.configurarPrimeiroAcesso(CPF_CNPJ, request);
 	}
 	
 	@Test
 	@Order(1)
-	void deveRealizarPrimeiroAcessoDaEmpresaComSucesso() throws Exception {
+	void deveDeletarTodosOsDadosDoBanco() {
 		usuarioRepository.deleteAll();
 		formaPagamentoRepository.deleteAll();
 		contaRepository.deleteAll();
 		empresaRepository.deleteAll();
 		aplicacaoRepository.deleteAll();
 		organizacaoRepository.deleteAll();
+	}
+	
+	@Test
+	@Order(2)
+	void deveRealizarPrimeiroAcessoDaEmpresaComSucesso() throws Exception {
 		
 		CredenciamentoResponse response = this.primeiroAcessoService.configurarPrimeiroAcesso(CPF_CNPJ, request);
 		
@@ -128,6 +121,7 @@ class TokenTest {
 	}
 
 	@Test
+	@Order(3)
 	void deveRealizarLoginComSucesso() throws Exception {
 		
 		CredenciamentoResponse response = this.usuarioService.solicitarNovaSenha(LOGIN);
@@ -157,12 +151,13 @@ class TokenTest {
 				.andExpect(status().isOk())
 				.andReturn();
 		
-		assertNotEquals(null, senhaAlterada.getToken());
-		assertNotEquals(null, TOKEN);
+		assertNotNull(senhaAlterada.getToken());
+		assertNotNull(TOKEN);
 		assertTrue(response.getUsuario() > 0);
 	}
 	
 	@Test
+	@Order(4)
 	void deveSelecionarEmpresaComSucesso() throws Exception {
 		
 		CredenciamentoResponse response = this.usuarioService.solicitarNovaSenha(LOGIN);
@@ -178,5 +173,4 @@ class TokenTest {
 		
 		assertNotNull(newTOken);
 	}
-
 }

@@ -7,7 +7,6 @@ import static com.digytal.control.webservice.LoginUniversal.TOKEN;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -25,7 +24,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.digytal.control.infra.model.CredenciamentoResponse;
 import com.digytal.control.infra.model.LoginRequest;
@@ -98,29 +96,25 @@ class PublicoResourceTest {
 	
 	@BeforeEach
 	void setup() {
-		usuarioRepository.deleteAll();
-		formaPagamentoRepository.deleteAll();
-		contaRepository.deleteAll();
-		empresaRepository.deleteAll();
-		aplicacaoRepository.deleteAll();
-		organizacaoRepository.deleteAll();
-		
 		request.setNomeFantasia("ROUPAS BR");
 		request.setSobrenomeSocial("ROUPAS BRASIL");
 		request.setEmail("brasil.roupas@hotmail.com.br");
-		
-		configurarAcesso = this.primeiroAcessoService.configurarPrimeiroAcesso(CPF_CNPJ, request);
 	}
 	
 	@Test
 	@Order(1)
-	void deveRealizarPrimeiroAcessoDaEmpresaComSucesso() throws Exception {
+	void deveDeletarTodosOsDadosDoBanco() {
 		usuarioRepository.deleteAll();
 		formaPagamentoRepository.deleteAll();
 		contaRepository.deleteAll();
 		empresaRepository.deleteAll();
 		aplicacaoRepository.deleteAll();
 		organizacaoRepository.deleteAll();
+	}
+	
+	@Test
+	@Order(2)
+	void deveRealizarPrimeiroAcessoDaEmpresaComSucesso() throws Exception {
 		
 		CredenciamentoResponse response = this.primeiroAcessoService.configurarPrimeiroAcesso(CPF_CNPJ, request);
 		
@@ -135,7 +129,7 @@ class PublicoResourceTest {
 	}
 	
 	@Test
-	@Order(2)
+	@Order(3)
 	void deveRealizarPrimeiroAcessoDaEmpresaAPartirDaRequesicaoComSucesso() throws Exception {
 		
 		String cpfCnpj = "06684753000140";
@@ -155,7 +149,7 @@ class PublicoResourceTest {
 	}
 	
 	@Test
-	@Order(3)
+	@Order(4)
 	void deveSolicitarNovaSenhaApartirDoLoginComSucesso() throws Exception {
 		
 		mockMvc.perform(patch("/public/solicitacao-nova-senha/login/{login}", LOGIN))
@@ -175,7 +169,7 @@ class PublicoResourceTest {
 	}
 	
 	@Test
-	@Order(4)
+	@Order(5)
 	void deveSolicitarNovaSenhaApartirDoIdComSucesso() throws Exception {
 		
 		CredenciamentoResponse responseExpected = this.usuarioService.solicitarNovaSenha(LOGIN);
@@ -200,7 +194,7 @@ class PublicoResourceTest {
 	}
 	
 	@Test
-	@Order(5)
+	@Order(6)
 	void deveAlterarSenhaApartirDaExpiracaoComSucesso() throws Exception {
 		
 		CredenciamentoResponse response = this.usuarioService.solicitarNovaSenha(LOGIN);
@@ -226,7 +220,7 @@ class PublicoResourceTest {
 	}
 	
 	@Test
-	@Order(6)
+	@Order(7)
 	void deveAlterarSenhaApartirDaExpiracaoAPartirDaRequesicaoComSucesso() throws Exception {
 		
 		CredenciamentoResponse response = this.usuarioService.solicitarNovaSenha(LOGIN);
@@ -249,7 +243,7 @@ class PublicoResourceTest {
 	}
 	
 	@Test
-	@Order(7)
+	@Order(8)
 	void deveRealizarLoginComSucesso() throws Exception {
 		
 		CredenciamentoResponse response = this.usuarioService.solicitarNovaSenha(LOGIN);
@@ -286,9 +280,8 @@ class PublicoResourceTest {
 	
 	
 	@Test
-	@Order(8)
+	@Order(9)
 	void deveSelecionarEmpresaComSucesso() throws Exception {
-		//CredenciamentoResponse configurarAcesso = this.primeiroAcessoService.configurarPrimeiroAcesso(CPF_CNPJ, request);
 		
 		CredenciamentoResponse response = this.usuarioService.solicitarNovaSenha(LOGIN);
 		

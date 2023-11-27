@@ -3,6 +3,7 @@ package com.digytal.control.webservice.publico;
 import static com.digytal.control.webservice.LoginUniversal.CPF_CNPJ;
 import static com.digytal.control.webservice.LoginUniversal.LOGIN;
 import static com.digytal.control.webservice.LoginUniversal.SENHA;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -85,48 +86,42 @@ class CredenciamentoTest {
 	
 	CadastroSimplificadoRequest request = new CadastroSimplificadoRequest();
 	
-	CredenciamentoResponse configurarAcesso = new CredenciamentoResponse();
-	
 	@BeforeEach
 	void setup() {
-		usuarioRepository.deleteAll();
-		formaPagamentoRepository.deleteAll();
-		contaRepository.deleteAll();
-		empresaRepository.deleteAll();
-		aplicacaoRepository.deleteAll();
-		organizacaoRepository.deleteAll();
-		
 		request.setNomeFantasia("ROUPAS BR");
 		request.setSobrenomeSocial("ROUPAS BRASIL");
 		request.setEmail("brasil.roupas@hotmail.com.br");
-		
-		configurarAcesso = this.primeiroAcessoService.configurarPrimeiroAcesso(CPF_CNPJ, request);
 	}
 	
 	@Test
 	@Order(1)
-	void deveRealizarPrimeiroAcessoDaEmpresaComSucesso() throws Exception {
+	void deveDeletarTodosOsDadosDoBanco() {
 		usuarioRepository.deleteAll();
 		formaPagamentoRepository.deleteAll();
 		contaRepository.deleteAll();
 		empresaRepository.deleteAll();
 		aplicacaoRepository.deleteAll();
 		organizacaoRepository.deleteAll();
+	}
+	
+	@Test
+	@Order(2)
+	void deveRealizarPrimeiroAcessoDaEmpresaComSucesso() throws Exception {
 		
 		CredenciamentoResponse response = this.primeiroAcessoService.configurarPrimeiroAcesso(CPF_CNPJ, request);
 		
-		assertNotEquals(null, response.getExpiracao());
-		assertNotEquals(null, response.getUsuario());
-		assertNotEquals(null, response.getLogin());
-		assertNotEquals(null, response.getNome());
-		assertNotEquals(null, response.getToken());
+		assertNotNull(response.getExpiracao());
+		assertNotNull(response.getUsuario());
+		assertNotNull(response.getLogin());
+		assertNotNull(response.getNome());
+		assertNotNull(response.getToken());
 		assertTrue(response.getExpiracao() > 0);
 		assertTrue(response.getUsuario() > 0);
 		assertEquals(request.getNomeFantasia(), response.getNome());
 	}
 	
 	@Test
-	@Order(2)
+	@Order(3)
 	void deveRealizarPrimeiroAcessoDaEmpresaAPartirDaRequesicaoComSucesso() throws Exception {
 		String cpfCnpj = "06684753000140";
 		
@@ -145,7 +140,7 @@ class CredenciamentoTest {
 	}
 	
 	@Test
-	@Order(3)
+	@Order(4)
 	void deveSolicitarNovaSenhaApartirDoLoginComSucesso() throws Exception {
 		
 		mockMvc.perform(patch("/public/solicitacao-nova-senha/login/{login}", LOGIN))
@@ -154,18 +149,18 @@ class CredenciamentoTest {
 		
 		CredenciamentoResponse response = this.usuarioService.solicitarNovaSenha(LOGIN);
 		
-		assertNotEquals(null, response.getExpiracao());
-		assertNotEquals(null, response.getUsuario());
-		assertNotEquals(null, response.getLogin());
-		assertNotEquals(null, response.getNome());
-		assertNotEquals(null, response.getToken());
+		assertNotNull(response.getExpiracao());
+		assertNotNull(response.getUsuario());
+		assertNotNull(response.getLogin());
+		assertNotNull(response.getNome());
+		assertNotNull(response.getToken());
 		assertTrue(response.getExpiracao() > 0);
 		assertTrue(response.getUsuario() > 0);
 		assertEquals(LOGIN, response.getLogin());
 	}
 	
 	@Test
-	@Order(4)
+	@Order(5)
 	void deveSolicitarNovaSenhaApartirDoIdComSucesso() throws Exception {
 		
 		CredenciamentoResponse responseExpected = this.usuarioService.solicitarNovaSenha(LOGIN);
@@ -177,11 +172,11 @@ class CredenciamentoTest {
 		
 		CredenciamentoResponse response = this.usuarioService.solicitarNovaSenha(id);
 		
-		assertNotEquals(null, response.getExpiracao());
-		assertNotEquals(null, response.getUsuario());
-		assertNotEquals(null, response.getLogin());
-		assertNotEquals(null, response.getNome());
-		assertNotEquals(null, response.getToken());
+		assertNotNull(response.getExpiracao());
+		assertNotNull(response.getUsuario());
+		assertNotNull(response.getLogin());
+		assertNotNull(response.getNome());
+		assertNotNull(response.getToken());
 		assertTrue(response.getExpiracao() > 0);
 		assertTrue(response.getUsuario() > 0);
 		assertEquals(id, response.getUsuario());
@@ -190,7 +185,7 @@ class CredenciamentoTest {
 	}
 	
 	@Test
-	@Order(5)
+	@Order(6)
 	void deveAlterarSenhaApartirDaExpiracaoComSucesso() throws Exception {
 		
 		CredenciamentoResponse response = this.usuarioService.solicitarNovaSenha(LOGIN);
@@ -209,14 +204,14 @@ class CredenciamentoTest {
 		boolean passwordOk = encoder.matches(SENHA, entity.getSenha());
 		
 		assertTrue(passwordOk);
-		assertNotEquals(null, entity.getSenha());
-		assertNotEquals(null, senhaAlterada.getToken());
+		assertNotNull(entity.getSenha());
+		assertNotNull(senhaAlterada.getToken());
 		assertEquals(LOGIN, senhaAlterada.getUsuario().getLogin());
 		
 	}
 	
 	@Test
-	@Order(6)
+	@Order(7)
 	void deveAlterarSenhaApartirDaExpiracaoAPartirDaRequesicaoComSucesso() throws Exception {
 		
 		CredenciamentoResponse response = this.usuarioService.solicitarNovaSenha(LOGIN);
