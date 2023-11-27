@@ -4,6 +4,7 @@ import static com.digytal.control.webservice.LoginUniversal.CPF_CNPJ;
 import static com.digytal.control.webservice.LoginUniversal.LOGIN;
 import static com.digytal.control.webservice.LoginUniversal.SENHA;
 import static com.digytal.control.webservice.LoginUniversal.TOKEN;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -123,11 +124,11 @@ class PublicoResourceTest {
 		
 		CredenciamentoResponse response = this.primeiroAcessoService.configurarPrimeiroAcesso(CPF_CNPJ, request);
 		
-		assertNotEquals(null, response.getExpiracao());
-		assertNotEquals(null, response.getUsuario());
-		assertNotEquals(null, response.getLogin());
-		assertNotEquals(null, response.getNome());
-		assertNotEquals(null, response.getToken());
+		assertNotNull(response.getExpiracao());
+		assertNotNull(response.getUsuario());
+		assertNotNull(response.getLogin());
+		assertNotNull(response.getNome());
+		assertNotNull(response.getToken());
 		assertTrue(response.getExpiracao() > 0);
 		assertTrue(response.getUsuario() > 0);
 		assertEquals(request.getNomeFantasia(), response.getNome());
@@ -163,11 +164,11 @@ class PublicoResourceTest {
 		
 		CredenciamentoResponse response = this.usuarioService.solicitarNovaSenha(LOGIN);
 		
-		assertNotEquals(null, response.getExpiracao());
-		assertNotEquals(null, response.getUsuario());
-		assertNotEquals(null, response.getLogin());
-		assertNotEquals(null, response.getNome());
-		assertNotEquals(null, response.getToken());
+		assertNotNull(response.getExpiracao());
+		assertNotNull(response.getUsuario());
+		assertNotNull(response.getLogin());
+		assertNotNull(response.getNome());
+		assertNotNull(response.getToken());
 		assertTrue(response.getExpiracao() > 0);
 		assertTrue(response.getUsuario() > 0);
 		assertEquals(LOGIN, response.getLogin());
@@ -186,11 +187,11 @@ class PublicoResourceTest {
 		
 		CredenciamentoResponse response = this.usuarioService.solicitarNovaSenha(id);
 		
-		assertNotEquals(null, response.getExpiracao());
-		assertNotEquals(null, response.getUsuario());
-		assertNotEquals(null, response.getLogin());
-		assertNotEquals(null, response.getNome());
-		assertNotEquals(null, response.getToken());
+		assertNotNull(response.getExpiracao());
+		assertNotNull(response.getUsuario());
+		assertNotNull(response.getLogin());
+		assertNotNull(response.getNome());
+		assertNotNull(response.getToken());
 		assertTrue(response.getExpiracao() > 0);
 		assertTrue(response.getUsuario() > 0);
 		assertEquals(id, response.getUsuario());
@@ -218,8 +219,8 @@ class PublicoResourceTest {
 		boolean passwordOk = encoder.matches(SENHA, entity.getSenha());
 		
 		assertTrue(passwordOk);
-		assertNotEquals(null, entity.getSenha());
-		assertNotEquals(null, senhaAlterada.getToken());
+		assertNotNull(entity.getSenha());
+		assertNotNull(senhaAlterada.getToken());
 		assertEquals(LOGIN, senhaAlterada.getUsuario().getLogin());
 		
 	}
@@ -278,8 +279,8 @@ class PublicoResourceTest {
 				.andExpect(status().isOk())
 				.andReturn();
 		
-		assertNotEquals(null, senhaAlterada.getToken());
-		assertNotEquals(null, TOKEN);
+		assertNotNull(senhaAlterada.getToken());
+		assertNotNull(TOKEN);
 		assertTrue(response.getUsuario() > 0);
 	}
 	
@@ -300,6 +301,6 @@ class PublicoResourceTest {
 				.andExpect(status().isOk())
 				.andReturn();
 		
-		assertNotEquals(null, newTOken);
+		assertNotNull(newTOken);
 	}
 }
