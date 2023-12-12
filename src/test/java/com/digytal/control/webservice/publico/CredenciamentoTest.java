@@ -1,8 +1,8 @@
 package com.digytal.control.webservice.publico;
 
-import static com.digytal.control.webservice.LoginUniversal.CPF_CNPJ;
-import static com.digytal.control.webservice.LoginUniversal.LOGIN;
-import static com.digytal.control.webservice.LoginUniversal.SENHA;
+import static com.digytal.control.webservice.statics.LoginUniversal.CPF_CNPJ;
+import static com.digytal.control.webservice.statics.LoginUniversal.LOGIN;
+import static com.digytal.control.webservice.statics.LoginUniversal.SENHA;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;

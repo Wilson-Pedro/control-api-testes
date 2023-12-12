@@ -1,8 +1,8 @@
 package com.digytal.control.webservice.publico;
 
-import static com.digytal.control.webservice.LoginUniversal.LOGIN;
-import static com.digytal.control.webservice.LoginUniversal.SENHA;
-import static com.digytal.control.webservice.LoginUniversal.TOKEN;
+import static com.digytal.control.webservice.statics.LoginUniversal.LOGIN;
+import static com.digytal.control.webservice.statics.LoginUniversal.SENHA;
+import static com.digytal.control.webservice.statics.LoginUniversal.TOKEN;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;

@@ -1,4 +1,4 @@
-package com.digytal.control.webservice;
+package com.digytal.control.webservice.statics;
 
 public class LoginUniversal {
 
