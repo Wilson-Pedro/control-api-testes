@@ -1,3 +1,4 @@
+package com.digytal.control.infra.utils;
 import com.digytal.control.infra.utils.Calculos;
 import com.digytal.control.model.modulo.contrato.request.ContratoItemRequest;
 import org.junit.jupiter.api.Assertions;
